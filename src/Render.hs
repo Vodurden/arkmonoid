@@ -9,7 +9,7 @@ import Types
 
 -- | Configures the display window of the game
 display :: G.Display
-display = InWindow "hblock" (640, 480) (0, 0)
+display = InWindow "hblock" (fromIntegral screenWidth, fromIntegral screenHeight) (0, 0)
 
 -- | Background color of the game window
 backgroundColor :: G.Color
@@ -28,5 +28,4 @@ render = do
 
 -- | Construct a picture given some geometry
 geometryPicture :: Geometry -> G.Picture
-geometryPicture (Ball r) = G.circleSolid r
 geometryPicture (Rectangle w h) = rectangleSolid w h
