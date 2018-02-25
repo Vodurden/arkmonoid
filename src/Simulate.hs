@@ -17,8 +17,8 @@ initializeWorld = do
 
   void $ newEntity $ defEntity
     { position = Just (V2 10 10)
-    , velocity = Just (V2 (-500) (300))
-    , geometry = Just $ Rectangle 100 25
+    , velocity = Just (V2 (-50) (30))
+    , geometry = Just $ Box 100 25
     , Types.color = Just G.blue
     }
 

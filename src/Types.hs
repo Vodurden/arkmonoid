@@ -7,7 +7,7 @@ import Data.Ecstasy
 import Linear.V2
 import qualified Graphics.Gloss.Data.Color as G
 
-data Geometry = Rectangle Float Float   -- A rectangle with a width and height
+data Geometry = Box Float Float   -- A rectangle with a width and height
 
 data Entity' f = Entity
   { position :: Component f 'Field (V2 Float)
@@ -19,6 +19,8 @@ data Entity' f = Entity
 
 type World = (Int, Entity' 'WorldOf)
 type GameSystem a = System Entity' a
+
+type GameQueryT m a = QueryT Entity' m a
 
 -- Todo find a better way to expose these globals
 screenWidth = 640

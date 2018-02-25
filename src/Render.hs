@@ -28,4 +28,4 @@ render = do
 
 -- | Construct a picture given some geometry
 geometryPicture :: Geometry -> G.Picture
-geometryPicture (Rectangle w h) = rectangleSolid w h
+geometryPicture (Box w h) = rectangleSolid w h
