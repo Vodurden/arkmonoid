@@ -11,7 +11,16 @@ import Simulate.Physics
 initializeWorld :: GameSystem ()
 initializeWorld = do
   void $ newEntity $ defEntity
-    { position = Just (V2 700 0)
+    { position = Just (V2 50 100)
+    , velocity = Just (V2 0 (-10))
+    , geometry = Just $ Box 100 25
+    , Types.color = Just G.red
+    }
+
+  void $ newEntity $ defEntity
+    { position = Just (V2 50 0)
+    , velocity = Just (V2 0 10)
+    , geometry = Just $ Box 100 25
     , Types.color = Just G.green
     }
 

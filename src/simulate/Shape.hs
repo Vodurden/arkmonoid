@@ -41,3 +41,45 @@ top (Rectangle (V2 _ y) (V2 _ h)) = y + (h / 2)
 
 bottom :: Shape -> Float
 bottom (Rectangle (V2 _ y) (V2 _ h)) = y - (h / 2)
+
+-- | Returns a penetration vector if the shapes are overlapping.
+-- | Otherwise it returns nothing.
+-- |
+-- | The penetration vector is a vector that can be applied to
+-- | shape 1 to ensure both shapes are no longer overlapping.
+penetration :: Shape -> Shape -> Maybe (V2 Float)
+penetration a b | overlapping a b =
+    Just $ snd $ bottomV `minOf` topV `minOf` leftV `minOf` rightV
+  where
+    bottomDistance = abs $ bottom a - top b
+    topDistance    = abs $ top a - bottom a
+    leftDistance   = abs $ left a - right b
+    rightDistance  = abs $ right a - left b
+
+    bottomVector = V2 0 bottomDistance
+    topVector    = V2 0 (-topDistance)
+    leftVector   = V2 (-leftDistance) 0
+    rightVector  = V2 rightDistance 0
+
+    bottomV = (bottomDistance, bottomVector)
+    topV    = (topDistance, topVector)
+    leftV   = (leftDistance, leftVector)
+    rightV  = (rightDistance, rightVector)
+
+    minOf :: (Float, V2 Float) -> (Float, V2 Float) -> (Float, V2 Float)
+    minOf (d1, v1) (d2, v2) = if d1 < d2
+                              then (d1, v1)
+                              else (d2, v2)
+penetration _ _ = Nothing
+
+-- | Returns true if both shapes overlap
+overlapping :: Shape -> Shape -> Bool
+overlapping a b = overlappingX a b && overlappingY a b
+
+-- | Returns true if both shapes overlap on the X axis
+overlappingX :: Shape -> Shape -> Bool
+overlappingX a b = left a < right b && right a > left b
+
+-- | Returns true if both shapes overlap on the Y axis
+overlappingY :: Shape -> Shape -> Bool
+overlappingY a b = top a > bottom b && bottom a < top b
