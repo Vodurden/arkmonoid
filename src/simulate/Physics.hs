@@ -8,6 +8,7 @@ import Data.Ecstasy
 import Linear.V2
 
 import Types
+import Extra.V2
 import Simulate.Collision as Collision
 import qualified Simulate.Shape as S
 
@@ -42,9 +43,11 @@ resolveImpact ent (Impact pen) = do
     vel <- get velocity
     (Box w h) <- get geometry
     let newPos = pos + pen
+    let newVel = reflect vel pen
 
     pure defEntity'
       { position = Set newPos
+      , velocity = Set newVel
       }
 
   for_ sets $ setEntity ent
