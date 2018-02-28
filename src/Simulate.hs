@@ -22,6 +22,7 @@ initializeWorld = do
     , velocity = Just (V2 0 10)
     , geometry = Just $ Box 100 25
     , Types.color = Just G.green
+    , bouncy = Just ()
     }
 
   void $ newEntity $ defEntity

@@ -14,6 +14,7 @@ data Entity' f = Entity
   , velocity :: Component f 'Field (V2 Float)
   , geometry :: Component f 'Field Geometry
   , color    :: Component f 'Field G.Color
+  , bouncy   :: Component f 'Field ()
   }
   deriving (Generic)
 
