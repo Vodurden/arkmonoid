@@ -9,15 +9,24 @@ import Linear.V2
 
 import Types
 import Extra.V2
-import Simulate.Collision as Collision
+import Extra.Ecstasy
+import Simulate.Collision
 import qualified Simulate.Shape as S
 
-stepPhysics :: Float -> GameSystem ()
+-- | Step the physical simulation one frame.
+-- |
+-- | This step includes motion, collision detection and collision resolution
+stepPhysics :: Float                            -- ^ The time (in milliseconds) elapsed since the last frame
+            -> GameSystem ()
 stepPhysics delta = do
-  stepVelocity delta
-  allCollisions <- findCollisions
-  traverse_ (resolveCollision resolveImpact) allCollisions
-  traverse_ (resolveCollision resolveBounce) allCollisions
+    stepVelocity delta
+    allCollisions <- collisions (fromIntegral screenWidth) (fromIntegral screenHeight)
+    traverse_ (resolveCollision onCollision) allCollisions
+  where
+    onCollision :: Ent -> Impact -> GameSystem ()
+    onCollision ent impact = do
+      resolveOverlap ent impact
+      resolveBounce ent impact
 
 stepVelocity :: Float -> GameSystem ()
 stepVelocity delta =
@@ -28,35 +37,27 @@ stepVelocity delta =
     pure defEntity'
       { position = Set (p + scaledV) }
 
-findCollisions :: GameSystem [Collision]
-findCollisions = Collision.collisions (fromIntegral screenWidth) (fromIntegral screenHeight)
-
 resolveCollision :: (Ent -> Impact -> GameSystem a) -> Collision -> GameSystem a
 resolveCollision resolve (BoundaryCollision ent impact) = resolve ent impact
 resolveCollision resolve (EntityCollision ent1 ent2 impact1 impact2) =
   resolve ent1 impact1 >> resolve ent2 impact2
 
-resolveImpact :: Ent -> Impact -> GameSystem ()
-resolveImpact ent (Impact pen) = do
-  cs <- getEntity ent
-  sets <- flip unQueryT cs $ do
-    pos <- get position
-    let newPos = pos + pen
+-- | Moves a colliding entity such that it is no longer colliding.
+resolveOverlap :: Ent -> Impact -> GameSystem ()
+resolveOverlap ent (Impact pen) = forEnt ent $ do
+  pos <- get position
+  let newPos = pos + pen
 
-    pure defEntity'
-      { position = Set newPos }
+  pure defEntity'
+    { position = Set newPos }
 
-  for_ sets $ setEntity ent
-
+-- | Changes the velocity of a colliding entity such that it "bounces" off the thing it
+-- | collided with. Only applies to entities that are bouncy
 resolveBounce :: Ent -> Impact -> GameSystem ()
-resolveBounce ent (Impact pen) = do
-  cs <- getEntity ent
-  sets <- flip unQueryT cs $ do
-    with bouncy
-    vel <- get velocity
-    let newVel = reflect vel pen
+resolveBounce ent (Impact pen) = forEnt ent $ do
+  with bouncy
+  vel <- get velocity
+  let newVel = reflect vel pen
 
-    pure defEntity'
-      { velocity = Set newVel }
-
-  for_ sets $ setEntity ent
+  pure defEntity'
+    { velocity = Set newVel }

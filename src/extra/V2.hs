@@ -11,4 +11,4 @@ reflect a b = a + offset
   where
     n = normalize b
     d = dot a n
-    offset = negate $ n * 2 * V2 d d
+    offset = negate $ 2 * V2 d d * n

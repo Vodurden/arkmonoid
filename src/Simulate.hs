@@ -12,14 +12,15 @@ initializeWorld :: GameSystem ()
 initializeWorld = do
   void $ newEntity $ defEntity
     { position = Just (V2 50 100)
-    , velocity = Just (V2 0 (-10))
+    , velocity = Just (V2 10 (-50))
     , geometry = Just $ Box 100 25
     , Types.color = Just G.red
+    , bouncy = Just ()
     }
 
   void $ newEntity $ defEntity
-    { position = Just (V2 50 0)
-    , velocity = Just (V2 0 10)
+    { position = Just (V2 0 0)
+    , velocity = Just (V2 40 40)
     , geometry = Just $ Box 100 25
     , Types.color = Just G.green
     , bouncy = Just ()
@@ -30,6 +31,7 @@ initializeWorld = do
     , velocity = Just (V2 (-50) (30))
     , geometry = Just $ Box 100 25
     , Types.color = Just G.blue
+    , bouncy = Just ()
     }
 
 step :: Float -> GameSystem ()

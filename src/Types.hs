@@ -26,25 +26,3 @@ type GameQueryT m a = QueryT Entity' m a
 -- Todo find a better way to expose these globals
 screenWidth = 640
 screenHeight = 480
-
--- runQuery :: Ent -> Query world a -> System world (Maybe a)
--- runQuery ent = runQueryT
--- runQueryT
---     :: ( HasWorld world
---        , Monad m
---        )
---     => Ent
---     -> QueryT world m a
---     -> SystemT world m (Maybe a)
--- runQueryT e qt = do
---   cs <- getEntity e
--- lift $ unQueryT qt cs
-
--- runQuery
---     :: ( HasWorld world)
---     => Ent
---     -> Query world a
---     -> System world (Maybe a)
--- runQuery e qt = do
---   cs <- getEntity e
---   lift $ unQuery qt cs
