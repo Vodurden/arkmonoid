@@ -20,6 +20,7 @@ stepPhysics :: Float                            -- ^ The time (in milliseconds) 
             -> GameSystem ()
 stepPhysics delta = do
     stepVelocity delta
+    stepImpulse
     allCollisions <- collisions (fromIntegral screenWidth) (fromIntegral screenHeight)
     traverse_ (resolveCollision onCollision) allCollisions
   where
@@ -31,11 +32,26 @@ stepPhysics delta = do
 stepVelocity :: Float -> GameSystem ()
 stepVelocity delta =
   emap $ do
+    without frozen
     p <- get position
     v <- get velocity
     let scaledV = fmap (*delta) v
     pure defEntity'
       { position = Set (p + scaledV) }
+
+-- | Impulse is applied in it's entirety in a single frame.
+-- |
+-- | This is useful to allow non-physics based systems to apply changes
+-- | in position
+stepImpulse :: GameSystem ()
+stepImpulse = emap $ do
+  without frozen
+  p <- get position
+  i <- get impulse
+  pure defEntity'
+    { position = Set (p + i)
+    , impulse = Unset
+    }
 
 resolveCollision :: (Ent -> Impact -> GameSystem a) -> Collision -> GameSystem a
 resolveCollision resolve (BoundaryCollision ent impact) = resolve ent impact

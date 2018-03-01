@@ -12,10 +12,10 @@ initializeWorld :: GameSystem ()
 initializeWorld = do
   void $ newEntity $ defEntity
     { position = Just (V2 50 100)
-    , velocity = Just (V2 10 (-50))
     , geometry = Just $ Box 100 25
     , Types.color = Just G.red
-    , bouncy = Just ()
+    , followMouseX = Just ()
+    , frozen = Just ()
     }
 
   void $ newEntity $ defEntity
@@ -24,6 +24,7 @@ initializeWorld = do
     , geometry = Just $ Box 100 25
     , Types.color = Just G.green
     , bouncy = Just ()
+    , frozen = Just ()
     }
 
   void $ newEntity $ defEntity
