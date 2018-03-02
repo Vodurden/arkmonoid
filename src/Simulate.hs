@@ -29,6 +29,7 @@ paddle = void $ newEntity $ defEntity
 
   , frozen = Just ()
   , followMouse = Just (FollowMouse True False)
+  , debug = Just ()
   }
 
 ball :: GameSystem ()
@@ -40,6 +41,7 @@ ball = void $ newEntity $ defEntity
 
   , frozen = Just ()
   , bouncy = Just ()
+  , debug = Just ()
   }
 
 block :: V2 Float -> GameSystem ()

@@ -20,6 +20,7 @@ data Entity' f = Entity
   , color           :: Component f 'Field G.Color
   , bouncy          :: Component f 'Field ()
   , followMouse     :: Component f 'Field FollowMouse
+  , debug           :: Component f 'Field ()
   }
   deriving (Generic)
 
