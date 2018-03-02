@@ -9,6 +9,9 @@ let
     overrides = haskellNew: haskellOld: rec {
       # OpenGLRaw segfaults when we try to build it's haddocks
       OpenGLRaw = pkgs.haskell.lib.dontHaddock haskellOld.OpenGLRaw;
+
+      # linear's tests take _forever_ on mac
+      linear = pkgs.haskell.lib.dontCheck haskellOld.linear;
     };
   };
 

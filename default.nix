@@ -1,4 +1,4 @@
-{ mkDerivation, base, ecstasy, gloss, linear, stdenv, transformers
+{ mkDerivation, base, ecstasy, gloss, linear, stdenv, transformers, darwin
 }:
 mkDerivation {
   pname = "hblock";
@@ -6,6 +6,7 @@ mkDerivation {
   src = ./.;
   isLibrary = false;
   isExecutable = true;
+  buildDepends = (if stdenv.isDarwin then [ darwin.apple_sdk.frameworks.OpenGL ] else []);
   executableHaskellDepends = [
     base ecstasy gloss linear transformers
   ];
