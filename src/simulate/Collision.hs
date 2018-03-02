@@ -1,7 +1,6 @@
 module Simulate.Collision where
 
 import Data.Maybe
-import Data.List
 import Data.Ecstasy
 import Linear.V2
 
@@ -19,10 +18,6 @@ data Collision = EntityCollision Ent Ent Impact Impact
 -- |
 -- | Contints a vector representing the depth of penetration
 data Impact = Impact (V2 Float)
-  deriving (Show, Eq)
-
--- | The side of a rectangle
-data Side = TopSide | BottomSide | LeftSide | RightSide
   deriving (Show, Eq)
 
 -- | Finds all collisions given the width/height of the world.

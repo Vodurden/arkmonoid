@@ -39,7 +39,7 @@ ball = void $ newEntity $ defEntity
   , Types.color = Just G.red
 
   , frozen = Just ()
-  , bouncy = Just()
+  , bouncy = Just ()
   }
 
 block :: V2 Float -> GameSystem ()
