@@ -1,6 +1,8 @@
 module Simulate.Shape where
 
+import Control.Monad
 import Data.Ecstasy
+import Linear.Metric
 import Linear.V2
 
 import Types
@@ -79,10 +81,10 @@ containsOrigin = containsPoint (V2 0 0)
 -- | - The minimum distance between the origin and the minkowski difference is the
 -- |   the distance between the two shapes
 minkowskiDifference :: Shape -> Shape -> Shape
-minkowskiDifference a b = AABB mdPos (V2 mdSizeX mdSizeY)
-  where (V2 mdTopLeftX mdTopLeftY) = minPoint a - maxPoint b
-        (V2 mdSizeX mdSizeY) = size a + size b
-        mdPos = V2 (mdTopLeftX + mdSizeX / 2) (mdTopLeftY + mdSizeY / 2)
+minkowskiDifference a b = AABB mdPos mdSize
+  where mdTopLeft = minPoint a - maxPoint b
+        mdSize = size a + size b
+        mdPos = mdTopLeft + mdSize / 2
 
 -- | Clamps a point such that it must be inside the Shape
 clampPointToShape :: V2 Float -> Shape -> V2 Float
@@ -90,10 +92,21 @@ clampPointToShape (V2 x y) a = V2 cx cy
   where cx = clamp (left a) (right a) x
         cy = clamp (bottom a) (top a) y
 
--- | Find the closest point on the bounds of the Shape to the given point
--- | TODO: Make this actually clamp to the bounds
+-- | Find the closest point on the bounds of the Shape to the given point.
+-- |
+-- | If the point is outside the shape then clamping it will give us the closest point
+-- |
+-- | Otherwise we need to find the smallest distance between the point and
+-- | each edge of the shape and then move the point by it.
 closestPointOnBoundsToPoint :: V2 Float -> Shape -> V2 Float
-closestPointOnBoundsToPoint p a = clampPointToShape p a
+closestPointOnBoundsToPoint p a = closest
+  where pointInShape @ (V2 px py) = clampPointToShape p a
+        leftVect =   V2 (left a) py
+        rightVect =  V2 (right a) py
+        topVect =    V2 px (top a)
+        bottomVect = V2 px (bottom a)
+        minV = minBy (distance pointInShape)
+        closest = leftVect `minV` rightVect `minV` topVect `minV` bottomVect
 
 -- | Returns a penetration vector if the shapes are overlapping.
 -- | Otherwise it returns nothing.
@@ -101,28 +114,8 @@ closestPointOnBoundsToPoint p a = clampPointToShape p a
 -- | The penetration vector is a vector that can be applied to
 -- | shape 1 to ensure both shapes are no longer overlapping.
 penetration :: Shape -> Shape -> Maybe (V2 Float)
-penetration a b | overlapping a b =
-    Just $ snd $ bottomV `minOf` topV `minOf` leftV `minOf` rightV
-  where
-    bottomDistance = abs $ bottom a - top b
-    topDistance    = abs $ top a - bottom a
-    leftDistance   = abs $ left a - right b
-    rightDistance  = abs $ right a - left b
-
-    bottomVector = V2 0 bottomDistance
-    topVector    = V2 0 (-topDistance)
-    leftVector   = V2 (-leftDistance) 0
-    rightVector  = V2 rightDistance 0
-
-    bottomV = (bottomDistance, bottomVector)
-    topV    = (topDistance, topVector)
-    leftV   = (leftDistance, leftVector)
-    rightV  = (rightDistance, rightVector)
-
-    minOf :: (Float, V2 Float) -> (Float, V2 Float) -> (Float, V2 Float)
-    minOf (d1, v1) (d2, v2) = if d1 < d2
-                              then (d1, v1)
-                              else (d2, v2)
+penetration a b | overlapping a b = Just penetrationVector
+  where penetrationVector = closestPointOnBoundsToPoint (V2 0 0) (minkowskiDifference a b)
 penetration _ _ = Nothing
 
 -- | Returns true if both shapes overlap

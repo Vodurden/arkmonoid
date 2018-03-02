@@ -41,7 +41,7 @@ shapeCollision (ent1, shape1) (ent2, shape2) =
   fmap (uncurry (EntityCollision ent1 ent2)) (shapeImpact shape1 shape2)
 
 shapeImpact :: S.Shape -> S.Shape -> Maybe (Impact, Impact)
-shapeImpact s1 s2 = fmap (\p -> (Impact (p / 2), Impact $ negate (p / 2))) (S.penetration s1 s2)
+shapeImpact s1 s2 = fmap (\p -> (Impact $ negate (p / 2), Impact (p / 2))) (S.penetration s1 s2)
 
 
 -- | Finds boundary collisions given the width/height of the world.
