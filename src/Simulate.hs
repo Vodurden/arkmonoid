@@ -28,7 +28,7 @@ paddle = void $ newEntity $ defEntity
   , Types.color = Just G.green
 
   , frozen = Just ()
-  , followMouseX = Just()
+  , followMouse = Just (FollowMouse True False)
   }
 
 ball :: GameSystem ()

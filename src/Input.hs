@@ -9,19 +9,21 @@ import Types
 handleInput :: Event -> GameSystem ()
 handleInput event =
   unfreezeOnLeftClick event >>
-  handleFollowMouseX event
+  handleFollowMouse event
 
 unfreezeOnLeftClick :: Event -> GameSystem ()
 unfreezeOnLeftClick (EventKey (MouseButton LeftButton) _ _ _) =
   emap $ pure defEntity' { frozen = Unset }
 unfreezeOnLeftClick _ = pure ()
 
-handleFollowMouseX :: Event -> GameSystem ()
-handleFollowMouseX (EventMotion (xPos, _)) =
+handleFollowMouse :: Event -> GameSystem ()
+handleFollowMouse (EventMotion (xPos, yPos)) =
   emap $ do
-    with followMouseX
-    (V2 x _) <- get position
-    let newImpulse = V2 (xPos - x) 0
+    (FollowMouse followX followY) <- get followMouse
+    (V2 x y) <- get position
+    let impulseX = if followX then xPos - x else 0
+    let impulseY = if followY then yPos - y else 0
+    let newImpulse = V2 impulseX impulseY
     pure defEntity'
       { impulse = Set newImpulse }
-handleFollowMouseX _ = pure ()
+handleFollowMouse _ = pure ()
