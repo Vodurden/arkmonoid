@@ -19,6 +19,7 @@ import qualified Simulate.Shape as S
 stepPhysics :: Float                            -- ^ The time (in milliseconds) elapsed since the last frame
             -> GameSystem ()
 stepPhysics delta = do
+    clearSpeed
     stepVelocity delta
     stepImpulse
     allCollisions <- collisions (fromIntegral screenWidth) (fromIntegral screenHeight)
@@ -29,17 +30,19 @@ stepPhysics delta = do
       resolveOverlap ent impact
       resolveBounce ent impact
 
+clearSpeed :: GameSystem ()
+clearSpeed = emap $ pure defEntity' { speed = Unset }
+
 stepVelocity :: Float -> GameSystem ()
 stepVelocity delta =
   emap $ do
     without frozen
     p <- get position
     v <- get velocity
-    s <- getMaybe speed
     let scaledV = fmap (*delta) v
     pure defEntity'
       { position = Set (p + scaledV)
-      , speed = Set (fromMaybe (V2 0 0) s + scaledV)
+      , speed = Set scaledV
       }
 
 -- | Impulse is applied in it's entirety in a single frame.
@@ -55,7 +58,7 @@ stepImpulse = emap $ do
   pure defEntity'
     { position = Set (p + i)
     , impulse = Unset
-    , speed = Set (fromMaybe (V2 0 0) s + i)
+    , speed = Set $ (fromMaybe (V2 0 0) s) + i
     }
 
 resolveCollision :: (Ent -> Impact -> GameSystem a) -> Collision -> GameSystem a
@@ -65,7 +68,7 @@ resolveCollision resolve (EntityCollision ent1 ent2 impact1 impact2) =
 
 -- | Moves a colliding entity such that it is no longer colliding.
 resolveOverlap :: Ent -> Impact -> GameSystem ()
-resolveOverlap ent (Impact pen) = forEnt ent $ do
+resolveOverlap ent (Impact pen _) = forEnt ent $ do
   pos <- get position
   let newPos = pos + pen
 
@@ -75,10 +78,10 @@ resolveOverlap ent (Impact pen) = forEnt ent $ do
 -- | Changes the velocity of a colliding entity such that it "bounces" off the thing it
 -- | collided with. Only applies to entities that are bouncy
 resolveBounce :: Ent -> Impact -> GameSystem ()
-resolveBounce ent (Impact pen) = forEnt ent $ do
+resolveBounce ent (Impact pen impactVel) = forEnt ent $ do
   with bouncy
   vel <- get velocity
-  let newVel = reflect vel pen
+  let newVel = (reflect vel pen) + impactVel
 
   pure defEntity'
     { velocity = Set newVel }

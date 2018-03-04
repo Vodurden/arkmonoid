@@ -20,10 +20,10 @@ fromEntity :: (Monad world) => GameQueryT world Shape
 fromEntity = do
     pos <- get position
     geo <- get geometry
-    maybeVel <- getMaybe velocity
+    maybeSpeed <- getMaybe speed
 
     -- An AABB is dynamic if it has a velocity
-    pure $ maybe (staticAABB pos geo) (\vel -> dynamicAABB pos geo vel) maybeVel
+    pure $ maybe (staticAABB pos geo) (\vel -> dynamicAABB pos geo vel) maybeSpeed
   where
     dynamicAABB :: (V2 Float) -> Geometry -> (V2 Float) -> Shape
     dynamicAABB pos (Box w h) movement = DynamicAABB pos (V2 w h) movement
@@ -38,6 +38,10 @@ center (DynamicAABB pos _ _) = pos
 size :: Shape -> Size
 size (StaticAABB _ s) = s
 size (DynamicAABB _ s _) = s
+
+movement :: Shape -> FrameMovement
+movement (StaticAABB _ _) = (V2 0 0)
+movement (DynamicAABB _ _ m) = m
 
 extents :: Shape -> Size
 extents a = size a / 2
