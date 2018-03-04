@@ -16,14 +16,15 @@ import qualified Simulate.Shape as S
 -- | Step the physical simulation one frame.
 -- |
 -- | This step includes motion, collision detection and collision resolution
-stepPhysics :: Float                            -- ^ The time (in milliseconds) elapsed since the last frame
-            -> GameSystem ()
-stepPhysics delta = do
+step :: (Ent -> Ent -> GameSystem ())    -- ^ onEntityCollision
+     -> Float                            -- ^ The time (in milliseconds) elapsed since the last frame
+     -> GameSystem ()
+step onEntityCollision delta = do
     clearSpeed
     stepVelocity delta
     stepImpulse
     allCollisions <- collisions (fromIntegral screenWidth) (fromIntegral screenHeight)
-    traverse_ (resolveCollision onCollision) allCollisions
+    traverse_ (resolveCollision onCollision onEntityCollision) allCollisions
   where
     onCollision :: Ent -> Impact -> GameSystem ()
     onCollision ent impact = do
@@ -61,10 +62,15 @@ stepImpulse = emap $ do
     , speed = Set $ (fromMaybe (V2 0 0) s) + i
     }
 
-resolveCollision :: (Ent -> Impact -> GameSystem a) -> Collision -> GameSystem a
-resolveCollision resolve (BoundaryCollision ent impact) = resolve ent impact
-resolveCollision resolve (EntityCollision ent1 ent2 impact1 impact2) =
-  resolve ent1 impact1 >> resolve ent2 impact2
+resolveCollision :: (Ent -> Impact -> GameSystem a)
+                 -> (Ent -> Ent -> GameSystem a)
+                 -> Collision
+                 -> GameSystem a
+resolveCollision resolve _ (BoundaryCollision ent impact) = resolve ent impact
+resolveCollision resolve resolveEnt (EntityCollision ent1 ent2 impact1 impact2) =
+  resolve ent1 impact1 >>
+  resolve ent2 impact2 >>
+  resolveEnt ent1 ent2
 
 -- | Moves a colliding entity such that it is no longer colliding.
 resolveOverlap :: Ent -> Impact -> GameSystem ()

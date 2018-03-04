@@ -9,7 +9,8 @@ import Control.Monad
 import qualified Graphics.Gloss.Data.Color as G
 
 import Types
-import Simulate.Physics
+import qualified Simulate.Physics as Physics
+import qualified Simulate.Damage as Damage
 
 initializeWorld :: GameSystem ()
 initializeWorld = do
@@ -18,7 +19,14 @@ initializeWorld = do
   blockLine (V2 (-290) 310) (V2 290 310) 11
 
 step :: Float -> GameSystem ()
-step delta = stepPhysics delta
+step delta = do
+    physicsStep delta
+    Damage.step
+  where
+    physicsStep = Physics.step onEntityCollision
+
+    onEntityCollision :: Ent -> Ent -> GameSystem ()
+    onEntityCollision = Damage.onEntityCollision
 
 -- TODO: An actual level system.
 paddle :: GameSystem ()
@@ -42,6 +50,8 @@ ball = void $ newEntity $ defEntity
   , frozen = Just ()
   , bouncy = Just ()
   , debug = Just ()
+
+  , damage = Just 1
   }
 
 block :: V2 Float -> GameSystem ()
@@ -49,6 +59,7 @@ block pos = void $ newEntity $ defEntity
   { position = Just pos
   , geometry = Just $ Box 50 10
   , Types.color = Just G.blue
+  , health = Just 1
   }
 
 blockLine :: V2 Float -> V2 Float -> Int -> GameSystem ()

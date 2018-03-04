@@ -18,6 +18,8 @@ data Entity' f = Entity
   , speed           :: Component f 'Field (V2 Float) -- ^ derived from velocity and impulse
   , frozen          :: Component f 'Field ()
   , geometry        :: Component f 'Field Geometry
+  , health          :: Component f 'Field Int -- ^ amount of damage this entity can sustain
+  , damage          :: Component f 'Field Int -- ^ amount of damage this entity does on collision
   , color           :: Component f 'Field G.Color
   , bouncy          :: Component f 'Field ()
   , followMouse     :: Component f 'Field FollowMouse
