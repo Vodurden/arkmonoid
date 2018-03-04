@@ -35,9 +35,12 @@ stepVelocity delta =
     without frozen
     p <- get position
     v <- get velocity
+    s <- getMaybe speed
     let scaledV = fmap (*delta) v
     pure defEntity'
-      { position = Set (p + scaledV) }
+      { position = Set (p + scaledV)
+      , speed = Set (fromMaybe (V2 0 0) s + scaledV)
+      }
 
 -- | Impulse is applied in it's entirety in a single frame.
 -- |
@@ -48,9 +51,11 @@ stepImpulse = emap $ do
   without frozen
   p <- get position
   i <- get impulse
+  s <- getMaybe speed
   pure defEntity'
     { position = Set (p + i)
     , impulse = Unset
+    , speed = Set (fromMaybe (V2 0 0) s + i)
     }
 
 resolveCollision :: (Ent -> Impact -> GameSystem a) -> Collision -> GameSystem a

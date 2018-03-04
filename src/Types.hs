@@ -15,6 +15,7 @@ data Entity' f = Entity
   { position        :: Component f 'Field (V2 Float)
   , velocity        :: Component f 'Field (V2 Float)
   , impulse         :: Component f 'Field (V2 Float)
+  , speed           :: Component f 'Field (V2 Float) -- ^ derived from velocity and impulse
   , frozen          :: Component f 'Field ()
   , geometry        :: Component f 'Field Geometry
   , color           :: Component f 'Field G.Color

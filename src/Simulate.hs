@@ -35,7 +35,7 @@ paddle = void $ newEntity $ defEntity
 ball :: GameSystem ()
 ball = void $ newEntity $ defEntity
   { position = Just (V2 (-50) (-180))
-  , velocity = Just (V2 50 (-50))
+  , velocity = Just (V2 250 (-250))
   , geometry = Just $ Box 10 10
   , Types.color = Just G.red
 
