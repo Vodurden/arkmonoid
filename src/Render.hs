@@ -50,6 +50,10 @@ renderDebug = do
   pure $ Pictures $ fmap (uncurry renderMinkowski) allCombinations
 
 renderMinkowski :: S.Shape -> S.Shape -> Picture
-renderMinkowski a b = G.Color debugColor $ G.Translate x y $ rectangleSolid w h
-  where minkowski @ (S.AABB (V2 x y) (V2 w h)) = S.minkowskiDifference a b
+renderMinkowski a b = G.Color debugColor $ G.Translate mX mY $ rectangleSolid mW mH
+  where minkowski = S.minkowskiDifference a b
+        mX = S.x minkowski
+        mY = S.y minkowski
+        mW = S.w minkowski
+        mH = S.h minkowski
         debugColor = if S.containsOrigin minkowski then G.red else G.white

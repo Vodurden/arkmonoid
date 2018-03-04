@@ -10,50 +10,61 @@ import Extra.Ord
 
 type Position = V2 Float
 type Size = V2 Float
-data Shape = AABB Position Size
+type FrameMovement = V2 Float -- ^ The amount this shape will move this frame
+
+data Shape = StaticAABB Position Size
+           | DynamicAABB Position Size FrameMovement
   deriving Show
 
 fromEntity :: (Monad world) => GameQueryT world Shape
 fromEntity = do
-    pos <- get Types.position
+    pos <- get position
     geo <- get geometry
-    pure $ fromEntity' pos geo
+    maybeVel <- getMaybe velocity
+
+    -- An AABB is dynamic if it has a velocity
+    pure $ maybe (staticAABB pos geo) (\vel -> dynamicAABB pos geo vel) maybeVel
   where
-    fromEntity' :: (V2 Float) -> Geometry -> Shape
-    fromEntity' (V2 x y) (Box w h) = AABB (V2 x y) (V2 w h)
+    dynamicAABB :: (V2 Float) -> Geometry -> (V2 Float) -> Shape
+    dynamicAABB pos (Box w h) movement = DynamicAABB pos (V2 w h) movement
+
+    staticAABB :: (V2 Float) -> Geometry -> Shape
+    staticAABB pos (Box w h) = StaticAABB pos (V2 w h)
 
 center :: Shape -> Position
-center (AABB pos _) = pos
+center (StaticAABB pos _) = pos
+center (DynamicAABB pos _ _) = pos
 
 size :: Shape -> Size
-size (AABB _ size) = size
+size (StaticAABB _ s) = s
+size (DynamicAABB _ s _) = s
 
 extents :: Shape -> Size
 extents a = size a / 2
 
 x :: Shape -> Float
-x (AABB (V2 x _) _) = x
+x shape = let (V2 x _) = center shape in x
 
 y :: Shape -> Float
-y (AABB (V2 _ y) _) = y
+y shape = let (V2 _ y) = center shape in y
 
 w :: Shape -> Float
-w (AABB _ (V2 w _)) = w
+w shape = let (V2 w _) = size shape in w
 
 h :: Shape -> Float
-h (AABB _ (V2 _ h)) = h
+h shape = let (V2 _ h) = size shape in h
 
 left :: Shape -> Float
-left (AABB (V2 x _) (V2 w _)) = x - (w / 2)
+left shape = (x shape) - ((w shape) / 2)
 
 right :: Shape -> Float
-right (AABB (V2 x _) (V2 w _)) = x + (w / 2)
+right shape = (x shape) + ((w shape) / 2)
 
 top :: Shape -> Float
-top (AABB (V2 _ y) (V2 _ h)) = y + (h / 2)
+top shape = (y shape) + ((h shape) / 2)
 
 bottom :: Shape -> Float
-bottom (AABB (V2 _ y) (V2 _ h)) = y - (h / 2)
+bottom shape = (y shape) - ((h shape) / 2)
 
 -- | Calculate the smallest point within the Shape
 minPoint :: Shape -> V2 Float
@@ -81,7 +92,7 @@ containsOrigin = containsPoint (V2 0 0)
 -- | - The minimum distance between the origin and the minkowski difference is the
 -- |   the distance between the two shapes
 minkowskiDifference :: Shape -> Shape -> Shape
-minkowskiDifference a b = AABB mdPos mdSize
+minkowskiDifference a b = StaticAABB mdPos mdSize
   where mdTopLeft = minPoint a - maxPoint b
         mdSize = size a + size b
         mdPos = mdTopLeft + mdSize / 2
