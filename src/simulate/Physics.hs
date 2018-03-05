@@ -76,10 +76,8 @@ resolveCollision resolve resolveEnt (EntityCollision ent1 ent2 impact1 impact2) 
 resolveOverlap :: Ent -> Impact -> GameSystem ()
 resolveOverlap ent (Impact pen _) = forEnt ent $ do
   pos <- get position
-  let newPos = pos + pen
-
   pure defEntity'
-    { position = Set newPos }
+    { position = Set (pos + pen) }
 
 -- | Changes the velocity of a colliding entity such that it "bounces" off the thing it
 -- | collided with. Only applies to entities that are bouncy
