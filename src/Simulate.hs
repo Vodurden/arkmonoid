@@ -16,7 +16,11 @@ initializeWorld :: GameSystem ()
 initializeWorld = do
   ball
   paddle
-  blockLine (V2 (-290) 310) (V2 290 310) 11
+  blockLine G.red    (V2 (-290) 230) (V2 290 230) 10
+  blockLine G.orange (V2 (-290) 210) (V2 290 210) 10
+  blockLine G.yellow (V2 (-290) 190) (V2 290 190) 10
+  blockLine G.green  (V2 (-290) 170) (V2 290 170) 10
+  blockLine G.blue   (V2 (-290) 150) (V2 290 150) 10
 
 step :: Float -> GameSystem ()
 step delta = do
@@ -31,13 +35,12 @@ step delta = do
 -- TODO: An actual level system.
 paddle :: GameSystem ()
 paddle = void $ newEntity $ defEntity
-  { position = Just (V2 0 (-220))
-  , geometry = Just $ Box 100 10
-  , Types.color = Just G.green
+  { position = Just (V2 0 (-215))
+  , geometry = Just $ Box 100 15
+  , Types.color = Just G.red
 
   , frozen = Just ()
   , followMouse = Just (FollowMouse True False)
-  , debug = Just ()
   }
 
 ball :: GameSystem ()
@@ -49,21 +52,20 @@ ball = void $ newEntity $ defEntity
 
   , frozen = Just ()
   , bouncy = Just ()
-  , debug = Just ()
 
   , damage = Just 1
   }
 
-block :: V2 Float -> GameSystem ()
-block pos = void $ newEntity $ defEntity
+block :: G.Color -> V2 Float -> GameSystem ()
+block color pos = void $ newEntity $ defEntity
   { position = Just pos
-  , geometry = Just $ Box 50 10
-  , Types.color = Just G.blue
+  , geometry = Just $ Box 50 15
+  , Types.color = Just color
   , health = Just 1
   }
 
-blockLine :: V2 Float -> V2 Float -> Int -> GameSystem ()
-blockLine start end blocks = traverse_ block positions
+blockLine :: G.Color -> V2 Float -> V2 Float -> Int -> GameSystem ()
+blockLine color start end blocks = traverse_ (block color) positions
   where
     scale = (abs $ end - start) / (fromIntegral blocks)
-    positions = fmap (\i -> start + scale * fromIntegral i) [1..blocks]
+    positions = fmap (\i -> start + scale * fromIntegral i) [0..blocks]
