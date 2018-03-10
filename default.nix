@@ -1,7 +1,7 @@
 { mkDerivation, base, ecstasy, gloss, linear, stdenv, transformers, darwin
 }:
 mkDerivation {
-  pname = "hblock";
+  pname = "arkmonoid";
   version = "0.1.0.0";
   src = ./.;
   isLibrary = false;

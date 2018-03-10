@@ -11,7 +11,7 @@ import qualified Simulate.Shape as S
 
 -- | Configures the display window of the game
 display :: G.Display
-display = InWindow "hblock" (fromIntegral screenWidth, fromIntegral screenHeight) (0, 0)
+display = InWindow "arkmonoid" (fromIntegral screenWidth, fromIntegral screenHeight) (0, 0)
 
 -- | Background color of the game window
 backgroundColor :: G.Color
