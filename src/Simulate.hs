@@ -9,7 +9,7 @@ import Control.Monad
 import qualified Graphics.Gloss.Data.Color as G
 
 import Types
-import qualified Simulate.Physics as Physics
+import qualified Physics.System as Physics
 import qualified Simulate.Damage as Damage
 
 initializeWorld :: GameSystem ()
@@ -24,13 +24,8 @@ initializeWorld = do
 
 step :: Float -> GameSystem ()
 step delta = do
-    physicsStep delta
+    Physics.step delta
     Damage.step
-  where
-    physicsStep = Physics.step onEntityCollision
-
-    onEntityCollision :: Ent -> Ent -> GameSystem ()
-    onEntityCollision = Damage.onEntityCollision
 
 -- TODO: An actual level system.
 paddle :: GameSystem ()

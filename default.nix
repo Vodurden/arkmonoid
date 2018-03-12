@@ -1,4 +1,4 @@
-{ mkDerivation, base, ecstasy, gloss, linear, stdenv, transformers, darwin
+{ mkDerivation, base, ecstasy, gloss, linear, stdenv, transformers, darwin, containers
 }:
 mkDerivation {
   pname = "arkmonoid";
@@ -8,7 +8,7 @@ mkDerivation {
   isExecutable = true;
   buildDepends = (if stdenv.isDarwin then [ darwin.apple_sdk.frameworks.OpenGL ] else []);
   executableHaskellDepends = [
-    base ecstasy gloss linear transformers
+    base ecstasy gloss linear transformers containers
   ];
   license = stdenv.lib.licenses.bsd3;
 }

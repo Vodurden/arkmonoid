@@ -7,7 +7,6 @@ import qualified Graphics.Gloss.Data.Color as G
 
 import Types
 import Extra.List
-import qualified Simulate.Shape as S
 
 -- | Configures the display window of the game
 display :: G.Display
@@ -20,9 +19,8 @@ backgroundColor = G.black
 render :: GameSystem Picture
 render = do
   gamePicture <- renderGame
-  debugPicture <- renderDebug
 
-  pure $ Pictures [gamePicture, debugPicture]
+  pure $ Pictures [gamePicture]
 
 renderGame :: GameSystem Picture
 renderGame = do
@@ -38,22 +36,3 @@ renderGame = do
 -- | Construct a picture given some geometry
 geometryPicture :: Geometry -> G.Picture
 geometryPicture (Box w h) = rectangleSolid w h
-
-renderDebug :: GameSystem Picture
-renderDebug = do
-  -- Minkowski debugging
-  candidates <- (efor . const) $ do
-    with debug
-    shape <- S.fromEntity
-    pure shape
-  let allCombinations = pairs candidates
-  pure $ Pictures $ fmap (uncurry renderMinkowski) allCombinations
-
-renderMinkowski :: S.Shape -> S.Shape -> Picture
-renderMinkowski a b = G.Color debugColor $ G.Translate mX mY $ rectangleSolid mW mH
-  where minkowski = S.minkowskiDifference a b
-        mX = S.x minkowski
-        mY = S.y minkowski
-        mW = S.w minkowski
-        mH = S.h minkowski
-        debugColor = if S.containsOrigin minkowski then G.red else G.white
