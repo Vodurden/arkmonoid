@@ -24,7 +24,7 @@ data CollisionModel = DynamicAABB AABB FrameMovement
 
 -- | Represents a collision from the perspective of a single shape.
 data Collision = PenetrationCollision PenetrationVector -- A collision based on the depth of overlap
-               | PointCollision Point Segment -- A collision at an exact point with a surface segment
+               | PointCollision Point Segment Float -- A collision at an exact point with a surface segment and the amount of distance to move it
   deriving Show
 
 -- | Represents the depth of penetration between two colliding shapes.

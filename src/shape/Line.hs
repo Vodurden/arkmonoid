@@ -22,6 +22,15 @@ b (Line (V2 x1 _) (V2 x2 _)) = x2 - x1
 c :: Line -> Float
 c (Line (V2 x1 y1) (V2 x2 y2)) = (x1 * y2) - (x2 * y1)
 
+dx :: Line -> Float
+dx = b
+
+dy :: Line -> Float
+dy = a
+
+normalVector :: Line -> V2 Float
+normalVector line = V2 (-dy line) (dx line)
+
 determinant :: Line -> Line -> Float
 determinant line1 line2 = (a line1) * (b line2) - (a line2) * (b line1)
 

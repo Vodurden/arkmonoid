@@ -9,6 +9,8 @@ import Extra.Maybe
 import Extra.V2
 import Shape.Types
 import qualified Shape.Collision as Collision
+import qualified Shape.Segment as Segment
+import qualified Shape.AABB as AABB
 
 import Control.Monad
 import Control.Applicative
@@ -16,50 +18,78 @@ import Data.Foldable
 import qualified Data.Map as Map
 import Data.Ecstasy
 import Data.Maybe
+import Data.List
 import Linear.V2
+import Linear.Metric
 
 step :: Float -> GameSystem ()
 step delta = do
-  stepMovement delta
+    clearSpeed
+    stepMovement delta
+    clearImpulse
+  where
+    clearSpeed = emap $ pure defEntity' { speed = Unset }
+    clearImpulse = emap $ pure defEntity' { impulse = Unset }
 
 stepMovement :: Float -> GameSystem ()
 stepMovement delta = do
-  collisionModels <- efor $ \ent -> do
-    model <- entCollisionModel delta
-    pure (ent, model)
-
-  let collisionMap = Map.fromList collisionModels
-
-  emapIndexed $ \ent -> entCollisionMovement ent delta collisionMap <|> entFreeMovement delta
-  emap $ pure defEntity' { impulse = Unset }
-
--- | Move an entity that has a collision model. Other physical entities will affect
--- | this movement.
-entCollisionMovement :: (Monad m)
-                     => Ent
-                     -> Float
-                     -> Map.Map Ent CollisionModel
-                     -> GameQueryT m (Entity' 'SetterOf)
-entCollisionMovement ent delta collisionModels = do
-    without frozen
-    model <- entCollisionModel delta
-    let otherModels = Map.delete ent collisionModels
-    let collisions = Collision.collisions model (Map.elems otherModels)
-
-    handleCollision collisions
+    models <- collisionModels
+    allCollisions <- allEntCollisions models
+    let activeCollisions = Map.map prioritisedCollisions allCollisions
+    entMove delta activeCollisions
   where
-    -- TODO: Multiple collisions
-    handleCollision [] = entFreeMovement delta
-    handleCollision [collision] =
-      (onCollisionResolveCollision collision) >> (onCollisionBounce collision)
-    handleCollision _ = undefined
+    collisionModels :: GameSystem (Map.Map Ent CollisionModel)
+    collisionModels = do
+      models <- efor $ \ent -> do
+        model <- entCollisionModel delta
+        pure (ent, model)
 
-onCollisionResolveCollision :: (Monad m) => Collision -> GameQueryT m (Entity' 'SetterOf)
-onCollisionResolveCollision (PenetrationCollision penVector) = entMoveBy penVector
-onCollisionResolveCollision (PointCollision point _) = entMoveTo point
+      pure $ Map.fromList models
 
-onCollisionBounce :: (Monad m) => Collision -> GameQueryT m (Entity' 'SetterOf)
-onCollisionBounce collision = do
+    allEntCollisions :: Map.Map Ent CollisionModel -> GameSystem (Map.Map Ent [Collision])
+    allEntCollisions models = do
+      collisions <- efor $ \ent -> do
+        model <- entCollisionModel delta
+        let otherModels = Map.delete ent models
+        let eCollisions = Collision.collisions model (Map.elems otherModels)
+        pure (ent, eCollisions)
+
+      pure $ Map.fromList collisions
+
+    -- | Prioritises collisions by the following rules:
+    -- |
+    -- |   1. If there are no collisions: just move
+    -- |   2. If there are any penetration collisions: resolve them all since we're colliding
+    -- |   3. Otherwise, if there are point collisions: resolve the shortest one
+    prioritisedCollisions :: [Collision] -> [Collision]
+    prioritisedCollisions collisions =
+      let penetrationCollisions = filter Collision.isPenetrationCollision collisions
+          pointCollision = take 1
+            $ sortOn (\(PointCollision _ _ frameMovement) -> frameMovement)
+            $ filter Collision.isPointCollision collisions
+      in penetrationCollisions `ifNonEmptyElse` pointCollision
+
+    entMove :: Float -> Map.Map Ent [Collision] -> GameSystem ()
+    entMove _ collisions = do
+      traverse_ (\(ent, c) -> entMovement ent delta c) $ Map.toList collisions
+
+entMovement :: Ent -> Float -> [Collision] -> GameSystem ()
+entMovement ent delta [] = forEnt ent $ do
+  without frozen
+  mov <- entNormalMovement delta
+  entMoveBy $ fromMaybe (V2 0 0) mov
+entMovement ent _ collisions = traverse_ (onCollision ent) collisions
+  where onCollision :: Ent -> Collision -> GameSystem ()
+        onCollision e c = do
+          onCollisionResolveCollision e c
+          onCollisionBounce e c
+
+onCollisionResolveCollision :: Ent -> Collision -> GameSystem ()
+onCollisionResolveCollision ent (PenetrationCollision penVector) = forEnt ent $ entMoveBy penVector
+onCollisionResolveCollision ent (PointCollision point _ _) = forEnt ent $ entMoveTo point
+
+onCollisionBounce :: Ent -> Collision -> GameSystem ()
+onCollisionBounce ent collision = forEnt ent $ do
     with bouncy
     vel <- get velocity
     let newVel = reflect vel reflectionVector
@@ -68,8 +98,7 @@ onCollisionBounce collision = do
   where
     reflectionVector = case collision of
       (PenetrationCollision penVector) -> penVector
-      -- TODO: Actual bouncing based on the surface of the point collision
-      (PointCollision _ _) -> V2 0 (-1)
+      (PointCollision _ collisionSegment _) -> Segment.normalVector collisionSegment
 
 entCollisionModel :: (Monad m) => Float -> GameQueryT m CollisionModel
 entCollisionModel delta = do
@@ -80,13 +109,6 @@ entCollisionModel delta = do
   pure $ case m of
            (Just movement) -> DynamicAABB aabb movement
            Nothing -> StaticAABB aabb
-
--- | Move this entity without regard for it's collision model (if any).
-entFreeMovement :: (Monad m) => Float -> GameQueryT m (Entity' 'SetterOf)
-entFreeMovement delta = do
-  without frozen
-  mov <- entNormalMovement delta
-  entMoveBy $ fromMaybe (V2 0 0) mov
 
 entNormalMovement :: (Monad m) => Float -> GameQueryT m (Maybe (V2 Float))
 entNormalMovement delta = do

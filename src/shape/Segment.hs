@@ -5,6 +5,7 @@ import qualified Shape.Line as Line
 import qualified Shape.AABB as AABB
 
 import Control.Monad
+import Linear.V2
 import Linear.Metric
 import Linear.Epsilon
 
@@ -13,6 +14,9 @@ start (Segment start _) = start
 
 end :: Segment -> Point
 end (Segment _ end) = end
+
+normalVector :: Segment -> V2 Float
+normalVector = Line.normalVector . Line.fromSegment
 
 length :: Segment -> Float
 length seg = distance (start seg) (end seg)
