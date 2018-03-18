@@ -7,10 +7,10 @@ import Extra.List
 import Extra.Ecstasy
 import Extra.Maybe
 import Extra.V2
-import Shape.Types
-import qualified Shape.Collision as Collision
-import qualified Shape.Segment as Segment
-import qualified Shape.AABB as AABB
+import Physics.Shape.Types
+import qualified Physics.Shape.Collision as Collision
+import qualified Physics.Shape.Segment as Segment
+import qualified Physics.Shape.AABB as AABB
 
 import Control.Monad
 import Control.Applicative

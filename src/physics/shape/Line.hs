@@ -1,6 +1,6 @@
-module Shape.Line where
+module Physics.Shape.Line where
 
-import Shape.Types
+import Physics.Shape.Types
 
 import Linear.V2
 import Linear.V3
@@ -37,7 +37,7 @@ determinant line1 line2 = (a line1) * (b line2) - (a line2) * (b line1)
 -- | This is not philosophically correct but we take the center of an infinite
 -- | line as the midpoint between the two definition points.
 -- |
--- | In reality the midpoint of an infinite line is 0. But we're going to ignore that :)
+-- | In reality the midpoint of an infinite line is 0 on at least one axis. But we're going to ignore that :)
 center :: Line -> Point
 center (Line start end) = (start + end) / 2.0
 

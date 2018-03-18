@@ -1,8 +1,8 @@
-module Shape.Collision where
+module Physics.Shape.Collision where
 
-import Shape.Types
-import qualified Shape.AABB as AABB
-import qualified Shape.Segment as Segment
+import Physics.Shape.Types
+import qualified Physics.Shape.AABB as AABB
+import qualified Physics.Shape.Segment as Segment
 
 import Data.Maybe
 import Data.List

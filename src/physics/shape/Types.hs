@@ -1,4 +1,4 @@
-module Shape.Types where
+module Physics.Shape.Types where
 
 import Linear.V2
 

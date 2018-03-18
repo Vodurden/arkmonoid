@@ -1,6 +1,6 @@
-module Shape.AABB where
+module Physics.Shape.AABB where
 
-import Shape.Types
+import Physics.Shape.Types
 
 import Linear.Metric
 import Linear.V2

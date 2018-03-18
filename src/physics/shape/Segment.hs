@@ -1,8 +1,8 @@
-module Shape.Segment where
+module Physics.Shape.Segment where
 
-import Shape.Types
-import qualified Shape.Line as Line
-import qualified Shape.AABB as AABB
+import Physics.Shape.Types
+import qualified Physics.Shape.Line as Line
+import qualified Physics.Shape.AABB as AABB
 
 import Control.Monad
 import Linear.V2
@@ -47,7 +47,9 @@ intersectionFraction :: Segment -> Point -> Maybe Float
 intersectionFraction seg point
   | containsPoint seg point =
       let intersectionSegment = Segment (start seg) point
-      in Just $ (Shape.Segment.length intersectionSegment) / (Shape.Segment.length seg)
+          intersectionLength = Physics.Shape.Segment.length intersectionSegment
+          segmentLength = Physics.Shape.Segment.length seg
+      in Just $ intersectionLength / segmentLength
   | otherwise = Nothing
 
 -- | Finds the intersection point of a segment and line if it exists
