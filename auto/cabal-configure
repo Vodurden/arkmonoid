@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+cabal configure --enable-library-profiling --enable-profiling --enable-tests --enable-benchmarks
