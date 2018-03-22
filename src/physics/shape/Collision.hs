@@ -20,6 +20,7 @@ colliding cm1 cm2 = AABB.overlapping (box cm1) (box cm2)
 
 -- | Find a collision between two models
 collision :: CollisionModel -> CollisionModel -> Maybe Collision
+collision a @ (StaticAABB aabb1) b @ (StaticAABB aabb2) = staticCollision a b
 collision a b | colliding a b = staticCollision a b
               | otherwise = dynamicCollision a b
 
