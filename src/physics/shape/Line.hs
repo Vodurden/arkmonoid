@@ -52,10 +52,11 @@ intersection line1 line2
   where
     det = determinant line1 line2
 
--- | Returns the area of the triangle formed by the start of the line, end of the line
--- | and the given point
-triangularArea :: Line -> Point -> Float
-triangularArea (Line (V2 startX startY) (V2 endX endY)) (V2 pointX pointY) =
+-- | Returns the determinant of a line and point. This is the area of the triangle formed
+-- | by the start of the line, end of the line and the given point. The result is positive/negative
+-- | depending on which side of the line the point falls on.
+pointDeterminant :: Line -> Point -> Float
+pointDeterminant (Line (V2 startX startY) (V2 endX endY)) (V2 pointX pointY) =
     -- The determinant is the area of the triangle formed by these three points.
     det33 matrix
   where
@@ -68,4 +69,4 @@ containsPoint :: Line -> Point -> Bool
 containsPoint line point =
     -- If the area of the triangle formed by these three points is near zero then we know
     -- the points are co-linear: the line contains the point
-    nearZero (triangularArea line point)
+    nearZero (pointDeterminant line point)

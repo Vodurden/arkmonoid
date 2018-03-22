@@ -11,6 +11,7 @@ import Physics.Shape.Types
 import qualified Physics.Shape.Collision as Collision
 import qualified Physics.Shape.Segment as Segment
 import qualified Physics.Shape.AABB as AABB
+import qualified Physics.Shape.Boundary as Boundary
 
 import Control.Monad
 import Control.Applicative
@@ -34,7 +35,9 @@ step delta = do
 stepMovement :: Float -> GameSystem ()
 stepMovement delta = do
     models <- collisionModels
-    allCollisions <- allEntCollisions models
+    entCollisions <- allEntCollisions models
+    boundCollisions <- allBoundaryCollisions models
+    let allCollisions = Map.unionWith (++) entCollisions boundCollisions
     let activeCollisions = Map.map prioritisedCollisions allCollisions
     entMove delta activeCollisions
   where
@@ -56,6 +59,16 @@ stepMovement delta = do
 
       pure $ Map.fromList collisions
 
+    allBoundaryCollisions :: Map.Map Ent CollisionModel -> GameSystem (Map.Map Ent [Collision])
+    allBoundaryCollisions models = do
+      collisions <- efor $ \ent -> do
+        model <- entCollisionModel delta
+        let bCollisions = catMaybes $ fmap (\b -> Boundary.collision b model) boundaries
+        pure (ent, bCollisions)
+
+      pure $ Map.fromList collisions
+
+
     -- | Prioritises collisions by the following rules:
     -- |
     -- |   1. If there are no collisions: just move
@@ -72,6 +85,21 @@ stepMovement delta = do
     entMove :: Float -> Map.Map Ent [Collision] -> GameSystem ()
     entMove _ collisions = do
       traverse_ (\(ent, c) -> entMovement ent delta c) $ Map.toList collisions
+
+boundaries :: [Boundary]
+boundaries =
+    [ Boundary (Line topLeftCorner topRightCorner) BoundLeft
+    , Boundary (Line bottomLeftCorner bottomRightCorner) BoundRight
+    , Boundary (Line bottomLeftCorner topLeftCorner) BoundLeft
+    , Boundary (Line bottomRightCorner topRightCorner) BoundRight
+    ]
+  where
+    halfScreenWidth   = (fromIntegral screenWidth) / 2
+    halfScreenHeight  = (fromIntegral screenHeight) / 2
+    topLeftCorner     = V2 (-halfScreenWidth) (halfScreenHeight)
+    topRightCorner    = V2 (halfScreenWidth) (halfScreenHeight)
+    bottomLeftCorner  = V2 (-halfScreenWidth) (-halfScreenHeight)
+    bottomRightCorner = V2 (halfScreenWidth) (-halfScreenHeight)
 
 entMovement :: Ent -> Float -> [Collision] -> GameSystem ()
 entMovement ent delta [] = forEnt ent $ do

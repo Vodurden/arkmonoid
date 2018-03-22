@@ -22,6 +22,12 @@ data CollisionModel = DynamicAABB AABB FrameMovement
                     | StaticAABB AABB
   deriving Show
 
+data BoundarySide = BoundLeft | BoundRight
+  deriving Show
+
+data Boundary = Boundary Line BoundarySide
+  deriving Show
+
 -- | Represents a collision from the perspective of a single shape.
 data Collision = PenetrationCollision PenetrationVector -- A collision based on the depth of overlap
                | PointCollision Point Segment Float -- A collision at an exact point with a surface segment and the amount of distance to move it

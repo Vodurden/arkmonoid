@@ -1,6 +1,7 @@
 module Physics.Shape.Collision where
 
 import Physics.Shape.Types
+import Physics.Shape.CollisionModel
 import qualified Physics.Shape.AABB as AABB
 import qualified Physics.Shape.Segment as Segment
 
@@ -63,14 +64,6 @@ staticSegmentAABBCollision segment aabb =
       smallestIntersection = listToMaybe
         $ sortOn (\(PointCollision point _ _) -> distance (Segment.start segment) point) intersections
   in smallestIntersection
-
-movement :: CollisionModel -> V2 Float
-movement (DynamicAABB _ m) = m
-movement (StaticAABB _) = (V2 0 0)
-
-box :: CollisionModel -> AABB
-box (DynamicAABB aabb _) = aabb
-box (StaticAABB aabb) = aabb
 
 isPointCollision :: Collision -> Bool
 isPointCollision (PointCollision _ _ _) = True

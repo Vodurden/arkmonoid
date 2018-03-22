@@ -13,3 +13,8 @@ minBy :: (Ord b) => (a -> b) -> a -> a -> a
 minBy f x y = if f x < f y
               then x
               else y
+
+maxBy :: (Ord b) => (a -> b) -> a -> a -> a
+maxBy f x y = if f x > f y
+              then x
+              else y
