@@ -27,6 +27,5 @@ step = killDeadEntities
 killDeadEntities :: GameSystem ()
 killDeadEntities = void $ emap $ do
   hp <- get health
-  if hp <= 0
-  then pure delEntity
-  else pure defEntity'
+  guard (hp <= 0)
+  pure delEntity
