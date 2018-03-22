@@ -25,17 +25,12 @@ import Linear.Metric
 
 step :: Float -> GameSystem ()
 step delta = do
-    clearSpeed
     stepMovement delta
     clearImpulse
   where
-    clearSpeed = emap $ do
-      with speed
-      pure $ defEntity' { speed = Unset }
-
     clearImpulse = emap $ do
       with impulse
-      pure $ defEntity' { impulse = Unset }
+      pure $ defEntity' { impulse = Set 0 }
 
 stepMovement :: Float -> GameSystem ()
 stepMovement delta = do
@@ -156,7 +151,6 @@ entMoveBy amount = do
   p <- get position
   pure defEntity'
     { position = Set (p + amount)
-    , speed = Set amount
     }
 
 -- | Move an entity to the given point
