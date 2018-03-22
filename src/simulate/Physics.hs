@@ -26,7 +26,6 @@ step :: (Ent -> Ent -> GameSystem ())    -- ^ onEntityCollision
      -> Float                            -- ^ The time (in milliseconds) elapsed since the last frame
      -> GameSystem ()
 step onEntityCollision delta = do
-    clearSpeed
     -- stepMovement
     stepVelocity delta
     stepImpulse
@@ -37,9 +36,6 @@ step onEntityCollision delta = do
     -- onCollision ent impact = do
     --   resolveOverlap ent impact
     --   resolveBounce ent impact
-
-clearSpeed :: GameSystem ()
-clearSpeed = emap $ pure defEntity' { speed = Unset }
 
 -- stepMovement :: Float -> GameSystem ()
 -- stepMovement delta = do

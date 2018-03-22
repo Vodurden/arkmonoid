@@ -29,8 +29,13 @@ step delta = do
     stepMovement delta
     clearImpulse
   where
-    clearSpeed = emap $ pure defEntity' { speed = Unset }
-    clearImpulse = emap $ pure defEntity' { impulse = Unset }
+    clearSpeed = emap $ do
+      with speed
+      pure $ defEntity' { speed = Unset }
+
+    clearImpulse = emap $ do
+      with impulse
+      pure $ defEntity' { impulse = Unset }
 
 stepMovement :: Float -> GameSystem ()
 stepMovement delta = do
