@@ -9,6 +9,7 @@ import Control.Monad
 import qualified Graphics.Gloss.Data.Color as G
 
 import Types
+import Extra.Ecstasy
 import qualified Physics.System as Physics
 import qualified Simulate.Damage as Damage
 
@@ -24,8 +25,13 @@ initializeWorld = do
 
 step :: Float -> GameSystem ()
 step delta = do
+    linkEntIds
     Physics.step delta
     Damage.step
+  where
+    linkEntIds = emapIndexed $ \ent -> do
+      without entId
+      pure defEntity' { entId = Set ent }
 
 -- TODO: An actual level system.
 paddle :: GameSystem ()

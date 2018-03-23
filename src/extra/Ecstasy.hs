@@ -1,5 +1,5 @@
 {-# LANGUAGE ViewPatterns #-}
-{-# LANGUAGE DataKinds     #-}
+{-# LANGUAGE DataKinds    #-}
 
 module Extra.Ecstasy where
 

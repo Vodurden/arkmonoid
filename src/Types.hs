@@ -12,7 +12,8 @@ data Geometry = Box Float Float   -- A rectangle with a width and height
 data FollowMouse = FollowMouse Bool Bool -- Follow mouse on the X-axis/Y-axis/both
 
 data Entity' f = Entity
-  { position        :: Component f 'Field (V2 Float)
+  { entId           :: Component f 'Field Ent
+  , position        :: Component f 'Field (V2 Float)
   , velocity        :: Component f 'Field (V2 Float)
   , impulse         :: Component f 'Field (V2 Float)
   , speed           :: Component f 'Field (V2 Float) -- ^ derived from velocity and impulse

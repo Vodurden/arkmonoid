@@ -25,14 +25,15 @@ import Linear.Metric
 
 step :: Float -> GameSystem ()
 step delta = do
-    stepMovement delta
+    collisions <- stepMovement delta
+    stepBounce collisions
     clearImpulse
   where
     clearImpulse = emap $ do
       with impulse
       pure $ defEntity' { impulse = Set 0 }
 
-stepMovement :: Float -> GameSystem ()
+stepMovement :: Float -> GameSystem (Map.Map Ent [Collision])
 stepMovement delta = do
     models <- collisionModels
     entCollisions <- allEntCollisions models
@@ -40,6 +41,7 @@ stepMovement delta = do
     let allCollisions = Map.unionWith (++) entCollisions boundCollisions
     let activeCollisions = Map.map prioritisedCollisions allCollisions
     entMove delta activeCollisions
+    pure activeCollisions
   where
     collisionModels :: GameSystem (Map.Map Ent CollisionModel)
     collisionModels = do
@@ -68,7 +70,6 @@ stepMovement delta = do
 
       pure $ Map.fromList collisions
 
-
     -- | Prioritises collisions by the following rules:
     -- |
     -- |   1. If there are no collisions: just move
@@ -83,8 +84,24 @@ stepMovement delta = do
       in penetrationCollisions `ifNonEmptyElse` pointCollision
 
     entMove :: Float -> Map.Map Ent [Collision] -> GameSystem ()
-    entMove _ collisions = do
-      traverse_ (\(ent, c) -> entMovement ent delta c) $ Map.toList collisions
+    entMove _ collisions = emap $ do
+      ent <- get entId
+      entMovement delta (fromMaybe [] $ Map.lookup ent collisions)
+
+
+stepBounce :: Map.Map Ent [Collision] -> GameSystem ()
+stepBounce collisions = emap $ do
+    with bouncy
+    ent <- get entId
+    let entCollisions = fromMaybe [] $ Map.lookup ent collisions
+    vel <- get velocity
+    let newVel = foldr reflectByCollision vel entCollisions
+
+    pure defEntity' { velocity = Set newVel }
+  where
+    reflectByCollision :: Collision -> V2 Float -> V2 Float
+    reflectByCollision (PenetrationCollision penVector) v = reflect v penVector
+    reflectByCollision (PointCollision _ collisionSegment _) v = reflect v (Segment.normalVector collisionSegment)
 
 boundaries :: [Boundary]
 boundaries =
@@ -101,32 +118,24 @@ boundaries =
     bottomLeftCorner  = V2 (-halfScreenWidth) (-halfScreenHeight)
     bottomRightCorner = V2 (halfScreenWidth) (-halfScreenHeight)
 
-entMovement :: Ent -> Float -> [Collision] -> GameSystem ()
-entMovement ent delta [] = forEnt ent $ do
+entMovement :: (Monad m) => Float -> [Collision] -> GameQueryT m (Entity' 'SetterOf)
+entMovement delta [] = do
   without frozen
   mov <- entNormalMovement delta
-  entMoveBy $ fromMaybe (V2 0 0) mov
-entMovement ent _ collisions = traverse_ (onCollision ent) collisions
-  where onCollision :: Ent -> Collision -> GameSystem ()
-        onCollision e c = do
-          onCollisionResolveCollision e c
-          onCollisionBounce e c
-
-onCollisionResolveCollision :: Ent -> Collision -> GameSystem ()
-onCollisionResolveCollision ent (PenetrationCollision penVector) = forEnt ent $ entMoveBy penVector
-onCollisionResolveCollision ent (PointCollision point _ _) = forEnt ent $ entMoveTo point
-
-onCollisionBounce :: Ent -> Collision -> GameSystem ()
-onCollisionBounce ent collision = forEnt ent $ do
-    with bouncy
-    vel <- get velocity
-    let newVel = reflect vel reflectionVector
-
-    pure defEntity' { velocity = Set newVel }
+  p <- get position
+  pure defEntity'
+    { position = Set $ p + (fromMaybe (V2 0 0) mov)
+    }
+entMovement _ collisions = do
+    p <- get position
+    let resolveV = foldr (+) (V2 0 0) $ fmap (resolutionVector p) collisions
+    pure defEntity'
+      { position = Set (p + resolveV)
+      }
   where
-    reflectionVector = case collision of
-      (PenetrationCollision penVector) -> penVector
-      (PointCollision _ collisionSegment _) -> Segment.normalVector collisionSegment
+    resolutionVector :: Point -> Collision -> V2 Float
+    resolutionVector _ (PenetrationCollision penVector) = penVector
+    resolutionVector pos (PointCollision point _ _) = point - pos
 
 entCollisionModel :: (Monad m) => Float -> GameQueryT m CollisionModel
 entCollisionModel delta = do
@@ -144,18 +153,3 @@ entNormalMovement delta = do
   let maybeVScaled = (fmap . fmap) (*delta) maybeV
   maybeI <- getMaybe impulse
   pure $ applyOrOther (+) maybeVScaled maybeI
-
--- | Move an entity by the given amount
-entMoveBy :: (Monad m) => V2 Float -> GameQueryT m (Entity' 'SetterOf)
-entMoveBy amount = do
-  p <- get position
-  pure defEntity'
-    { position = Set (p + amount)
-    }
-
--- | Move an entity to the given point
-entMoveTo :: (Monad m) => V2 Float -> GameQueryT m (Entity' 'SetterOf)
-entMoveTo point = do
-  p <- get position
-  let diff = point - p
-  entMoveBy diff
