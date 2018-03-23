@@ -22,6 +22,7 @@ import Data.Maybe
 import Data.List
 import Linear.V2
 import Linear.Metric
+import Linear.Epsilon
 
 step :: Float -> GameSystem ()
 step delta = do
@@ -122,16 +123,11 @@ entMovement :: (Monad m) => Float -> [Collision] -> GameQueryT m (Entity' 'Sette
 entMovement delta [] = do
   without frozen
   mov <- entNormalMovement delta
-  p <- get position
-  pure defEntity'
-    { position = Set $ p + (fromMaybe (V2 0 0) mov)
-    }
+  entMove (fromMaybe (V2 0 0) mov)
 entMovement _ collisions = do
     p <- get position
     let resolveV = foldr (+) (V2 0 0) $ fmap (resolutionVector p) collisions
-    pure defEntity'
-      { position = Set (p + resolveV)
-      }
+    entMove resolveV
   where
     resolutionVector :: Point -> Collision -> V2 Float
     resolutionVector _ (PenetrationCollision penVector) = penVector
@@ -139,13 +135,24 @@ entMovement _ collisions = do
 
 entCollisionModel :: (Monad m) => Float -> GameQueryT m CollisionModel
 entCollisionModel delta = do
-  p <- get position
+  center <- get position
   (Box w h) <- get geometry
+  let halfWH = V2 (w / 2) (h / 2)
+  let aabbMin = center - halfWH
+  let aabbMax = center + halfWH
   m <- entNormalMovement delta
-  let aabb = AABB p (V2 w h)
+  let aabb = AABB aabbMin aabbMax
   pure $ case m of
            (Just movement) -> DynamicAABB aabb movement
            Nothing -> StaticAABB aabb
+
+entMove :: (Monad m) => V2 Float -> GameQueryT m (Entity' 'SetterOf)
+entMove v = do
+  guard (not $ nearZero v)
+  p <- get position
+  pure defEntity'
+    { position = Set (p + v)
+    }
 
 entNormalMovement :: (Monad m) => Float -> GameQueryT m (Maybe (V2 Float))
 entNormalMovement delta = do

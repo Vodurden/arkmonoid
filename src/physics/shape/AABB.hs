@@ -8,37 +8,22 @@ import Linear.V2
 import Extra.Ord
 
 center :: AABB -> Point
-center (AABB pos _) = pos
+center aabb @ (AABB minP maxP) = maxP - (size aabb / 2)
 
 size :: AABB -> Size
-size (AABB _ s) = s
-
-extents :: AABB -> Size
-extents a = size a / 2
-
-x :: AABB -> Float
-x shape = let (V2 x _) = center shape in x
-
-y :: AABB -> Float
-y shape = let (V2 _ y) = center shape in y
-
-w :: AABB -> Float
-w shape = let (V2 w _) = size shape in w
-
-h :: AABB -> Float
-h shape = let (V2 _ h) = size shape in h
+size (AABB minP maxP) = abs $ maxP - minP
 
 left :: AABB -> Float
-left shape = (x shape) - ((w shape) / 2)
+left shape = let (V2 x _) = minPoint shape in x
 
 right :: AABB -> Float
-right shape = (x shape) + ((w shape) / 2)
+right shape = let (V2 x _) = maxPoint shape in x
 
 top :: AABB -> Float
-top shape = (y shape) + ((h shape) / 2)
+top shape = let (V2 _ y) = maxPoint shape in y
 
 bottom :: AABB -> Float
-bottom shape = (y shape) - ((h shape) / 2)
+bottom shape = let (V2 _ y) = minPoint shape in y
 
 topLeft :: AABB -> Point
 topLeft shape = V2 (left shape) (top shape)
@@ -63,11 +48,11 @@ segments a =
 
 -- | Calculate the smallest point within the AABB
 minPoint :: AABB -> Point
-minPoint a = center a - extents a
+minPoint (AABB min _) = min
 
 -- | Calculate the largest point within the AABB
 maxPoint :: AABB -> Point
-maxPoint a = center a + extents a
+maxPoint (AABB _ max) = max
 
 -- | Returns true if the AABB contains the point
 containsPoint :: AABB -> Point -> Bool
@@ -87,10 +72,11 @@ containsOrigin shape = containsPoint shape (V2 0 0)
 -- | - The minimum distance between the origin and the minkowski difference is the
 -- |   the distance between the two shapes
 minkowskiDifference :: AABB -> AABB -> AABB
-minkowskiDifference a b = AABB mdPos mdSize
-  where mdTopLeft = minPoint a - maxPoint b
-        mdSize = size a + size b
-        mdPos = mdTopLeft + mdSize / 2
+minkowskiDifference a b = AABB mdMin mdMax
+  where (V2 mdLeft mdBottom) = minPoint a - maxPoint b
+        (V2 mdWidth mdHeight) = size a + size b
+        mdMin = V2 mdLeft mdBottom
+        mdMax = V2 (mdLeft + mdWidth) (mdBottom + mdHeight)
 
 -- | Clamps a point such that it must be inside the AABB
 clampPointToAABB :: V2 Float -> AABB -> V2 Float

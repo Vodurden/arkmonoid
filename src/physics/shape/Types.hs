@@ -15,7 +15,7 @@ data Segment = Segment !Point !Point
   deriving Show
 
 -- | An axis-aligned bounding box with a center point and size
-data AABB = AABB !Point !Size
+data AABB = AABB !Point !Point
   deriving Show
 
 data CollisionModel = DynamicAABB !AABB !FrameMovement
