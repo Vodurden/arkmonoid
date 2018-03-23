@@ -21,8 +21,6 @@ let
     };
   };
 
-        unstable.haskellPackages.ghc-prof-flamegraph
-
   variant = if doBenchmark then pkgs.haskell.lib.doBenchmark else pkgs.lib.id;
 
   drv = variant (haskellPackages.callPackage f {});

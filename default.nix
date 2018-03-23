@@ -1,4 +1,4 @@
-{ mkDerivation, base, ecstasy, gloss, linear, stdenv, transformers, darwin, containers, ghc-prof-flamegraph
+{ mkDerivation, base, ecstasy, gloss, linear, stdenv, transformers, darwin, containers, flamegraph, ghc-prof-flamegraph
 }:
 mkDerivation {
   pname = "arkmonoid";
@@ -6,7 +6,7 @@ mkDerivation {
   src = ./.;
   isLibrary = false;
   isExecutable = true;
-  buildDepends = (if stdenv.isDarwin then [ darwin.apple_sdk.frameworks.OpenGL ghc-prof-flamegraph ] else [ghc-prof-flamegraph]);
+  buildDepends = (if stdenv.isDarwin then [ darwin.apple_sdk.frameworks.OpenGL flamegraph ghc-prof-flamegraph ] else [flamegraph ghc-prof-flamegraph]);
   executableHaskellDepends = [
     base ecstasy gloss linear transformers containers
   ];
