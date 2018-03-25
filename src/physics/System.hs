@@ -24,11 +24,13 @@ import Linear.V2
 import Linear.Metric
 import Linear.Epsilon
 
-step :: Float -> GameSystem ()
+step :: Float -> GameSystem (Map.Map Ent [Collision])
 step delta = do
     collisions <- stepMovement delta
     stepBounce collisions
     clearImpulse
+
+    pure collisions
   where
     clearImpulse = emap $ do
       with impulse
@@ -71,6 +73,24 @@ stepMovement delta = do
     moveEnts _ collisions = emap $ do
       ent <- get entId
       entMovement delta (fromMaybe [] $ Map.lookup ent collisions)
+
+-- | Returns all the collisions that occurred between entities.
+-- |
+-- | This includes collisions from both entities perspectives so
+-- | all collisions will incur two entries in this list.
+-- |
+-- | The first entity is the entity that collided with the second
+-- | entity.
+collidingEnts :: Map.Map Ent [Collision] -> [(Ent, Ent)]
+collidingEnts collisions =
+    concatMap (uncurry entCollisions) $ Map.toList collisions
+  where
+    entCollisions :: Ent -> [Collision] -> [(Ent, Ent)]
+    entCollisions ent cs = catMaybes $ fmap (entCollision ent) cs
+
+    entCollision :: Ent -> Collision -> Maybe (Ent, Ent)
+    entCollision ent (EntCollision e _) = Just (ent, e)
+    entCollision _ (BoundaryCollision _) = Nothing
 
 
 stepBounce :: Map.Map Ent [Collision] -> GameSystem ()

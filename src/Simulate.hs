@@ -11,7 +11,7 @@ import qualified Graphics.Gloss.Data.Color as G
 import Types
 import Extra.Ecstasy
 import qualified Physics.System as Physics
-import qualified Simulate.Damage as Damage
+import qualified Damage.DamageSystem as DamageSystem
 
 initializeWorld :: GameSystem ()
 initializeWorld = do
@@ -26,8 +26,8 @@ initializeWorld = do
 step :: Float -> GameSystem ()
 step delta = do
     linkEntIds
-    Physics.step delta
-    Damage.step
+    collisions <- Physics.step delta
+    DamageSystem.step collisions
   where
     linkEntIds = emapIndexed $ \ent -> do
       without entId
