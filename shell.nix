@@ -16,8 +16,9 @@ let
       # OpenGLRaw segfaults when we try to build it's haddocks
       OpenGLRaw = pkgs.haskell.lib.dontHaddock haskellOld.OpenGLRaw;
 
-      # linear's tests take _forever_ on mac
+      # these tests take _forever_ 
       linear = pkgs.haskell.lib.dontCheck haskellOld.linear;
+      happy = pkgs.haskell.lib.dontCheck haskellOld.happy;
     };
   };
 
