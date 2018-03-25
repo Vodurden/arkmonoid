@@ -40,11 +40,11 @@ bottomRight shape = V2 (right shape) (bottom shape)
 -- | Returns a list of lines that make up this AABB
 segments :: AABB -> [Segment]
 segments a =
-  [ Segment (topLeft a) (topRight a)
-  , Segment (topRight a) (bottomRight a)
-  , Segment (topLeft a) (bottomLeft a)
-  , Segment (bottomLeft a) (bottomRight a)
-  ]
+    [ Segment (topLeft a) (topRight a)
+    , Segment (topRight a) (bottomRight a)
+    , Segment (topLeft a) (bottomLeft a)
+    , Segment (bottomLeft a) (bottomRight a)
+    ]
 
 -- | Calculate the smallest point within the AABB
 minPoint :: AABB -> Point

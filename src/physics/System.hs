@@ -16,7 +16,7 @@ import qualified Physics.Shape.Boundary as Boundary
 import Control.Monad
 import Control.Applicative
 import Data.Foldable
-import qualified Data.Map as Map
+import qualified Data.Map.Strict as Map
 import Data.Ecstasy
 import Data.Maybe
 import Data.List
@@ -37,11 +37,11 @@ step delta = do
 stepMovement :: Float -> GameSystem (Map.Map Ent [Collision])
 stepMovement delta = do
     models <- collisionModels
-    entCollisions <- allEntCollisions models
-    boundCollisions <- allBoundaryCollisions models
+    let entCollisions = Collision.runModelCollisions EntCollision models
+    let boundCollisions = Collision.runBoundaryCollisions BoundaryCollision boundaries models
     let allCollisions = Map.unionWith (++) entCollisions boundCollisions
     let activeCollisions = Map.map prioritisedCollisions allCollisions
-    entMove delta activeCollisions
+    moveEnts delta activeCollisions
     pure activeCollisions
   where
     collisionModels :: GameSystem (Map.Map Ent CollisionModel)
@@ -52,25 +52,6 @@ stepMovement delta = do
 
       pure $ Map.fromList models
 
-    allEntCollisions :: Map.Map Ent CollisionModel -> GameSystem (Map.Map Ent [Collision])
-    allEntCollisions models = do
-      collisions <- efor $ \ent -> do
-        model <- entCollisionModel delta
-        let otherModels = Map.delete ent models
-        let eCollisions = Collision.collisions model (Map.elems otherModels)
-        pure (ent, eCollisions)
-
-      pure $ Map.fromList collisions
-
-    allBoundaryCollisions :: Map.Map Ent CollisionModel -> GameSystem (Map.Map Ent [Collision])
-    allBoundaryCollisions models = do
-      collisions <- efor $ \ent -> do
-        model <- entCollisionModel delta
-        let bCollisions = catMaybes $ fmap (\b -> Boundary.collision b model) boundaries
-        pure (ent, bCollisions)
-
-      pure $ Map.fromList collisions
-
     -- | Prioritises collisions by the following rules:
     -- |
     -- |   1. If there are no collisions: just move
@@ -78,14 +59,16 @@ stepMovement delta = do
     -- |   3. Otherwise, if there are point collisions: resolve the shortest one
     prioritisedCollisions :: [Collision] -> [Collision]
     prioritisedCollisions collisions =
-      let penetrationCollisions = filter Collision.isPenetrationCollision collisions
+      let penetrationCollisions =
+            filter (Collision.onCollisionType Collision.isPenetrationCollision) collisions
           pointCollision = take 1
-            $ sortOn (\(PointCollision _ _ frameMovement) -> frameMovement)
-            $ filter Collision.isPointCollision collisions
+            $ sortOn
+              (Collision.onCollisionType (\(PointCollision _ _ frameMovement) -> frameMovement))
+            $ filter (Collision.onCollisionType Collision.isPointCollision) collisions
       in penetrationCollisions `ifNonEmptyElse` pointCollision
 
-    entMove :: Float -> Map.Map Ent [Collision] -> GameSystem ()
-    entMove _ collisions = emap $ do
+    moveEnts :: Float -> Map.Map Ent [Collision] -> GameSystem ()
+    moveEnts _ collisions = emap $ do
       ent <- get entId
       entMovement delta (fromMaybe [] $ Map.lookup ent collisions)
 
@@ -101,8 +84,9 @@ stepBounce collisions = emap $ do
     pure defEntity' { velocity = Set newVel }
   where
     reflectByCollision :: Collision -> V2 Float -> V2 Float
-    reflectByCollision (PenetrationCollision penVector) v = reflect v penVector
-    reflectByCollision (PointCollision _ collisionSegment _) v = reflect v (Segment.normalVector collisionSegment)
+    reflectByCollision collision v = case Collision.collisionType collision of
+      (PenetrationCollision penVector) -> reflect v penVector
+      (PointCollision _ collisionSegment _) -> reflect v (Segment.normalVector collisionSegment)
 
 boundaries :: [Boundary]
 boundaries =
@@ -130,8 +114,9 @@ entMovement _ collisions = do
     entMove resolveV
   where
     resolutionVector :: Point -> Collision -> V2 Float
-    resolutionVector _ (PenetrationCollision penVector) = penVector
-    resolutionVector pos (PointCollision point _ _) = point - pos
+    resolutionVector pos collision = case Collision.collisionType collision of
+      (PenetrationCollision penVector) -> penVector
+      (PointCollision point _ _) -> point - pos
 
 entCollisionModel :: (Monad m) => Float -> GameQueryT m CollisionModel
 entCollisionModel delta = do
