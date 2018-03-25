@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds     #-}
 
-module Physics.System where
+module Physics.PhysicsSystem where
 
 import Types
 import Extra.List

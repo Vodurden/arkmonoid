@@ -9,7 +9,7 @@ import qualified Data.Map.Strict as Map
 
 import Types
 import Physics.Shape.Types
-import qualified Physics.System as PhysicsSystem
+import qualified Physics.PhysicsSystem as PhysicsSystem
 
 step :: Map.Map Ent [Collision] -> GameSystem ()
 step collisions = do
