@@ -34,7 +34,7 @@ step delta = do
   where
     clearImpulse = emap $ do
       with impulse
-      pure $ defEntity' { impulse = Set 0 }
+      pure $ defEntity' { impulse = Unset }
 
 stepMovement :: Float -> GameSystem (Map.Map Ent [Collision])
 stepMovement delta = do
@@ -101,6 +101,7 @@ stepBounce collisions = emap $ do
     vel <- get velocity
     let newVel = foldr reflectByCollision vel entCollisions
 
+    guard (not $ nearZero newVel)
     pure defEntity' { velocity = Set newVel }
   where
     reflectByCollision :: Collision -> V2 Float -> V2 Float
