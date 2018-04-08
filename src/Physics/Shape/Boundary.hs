@@ -8,8 +8,9 @@ import qualified Physics.Shape.CollisionModel as CollisionModel
 import Extra.Ord
 import Extra.Maybe
 
-import Linear.Metric
 import Control.Applicative
+import Control.Lens
+import Linear.Metric
 
 collision :: Boundary -> CollisionModel -> Maybe CollisionType
 collision boundary model = staticCollision boundary model <|> dynamicCollision boundary model
@@ -18,8 +19,8 @@ collision boundary model = staticCollision boundary model <|> dynamicCollision b
 staticCollision :: Boundary -> CollisionModel -> Maybe CollisionType
 staticCollision boundary model = do
   let box = CollisionModel.box model
-  let minCollision = staticPointCollision boundary (AABB.minPoint box)
-  let maxCollision = staticPointCollision boundary (AABB.maxPoint box)
+  let minCollision = staticPointCollision boundary (box^.minPoint)
+  let maxCollision = staticPointCollision boundary (box^.maxPoint)
   let largestPenetration = applyOrOther (maxBy quadrance) minCollision maxCollision
   fmap PenetrationCollision largestPenetration
 

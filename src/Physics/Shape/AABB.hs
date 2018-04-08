@@ -2,28 +2,29 @@ module Physics.Shape.AABB where
 
 import Physics.Shape.Types
 
+import Control.Lens
 import Linear.Metric
 import Linear.V2
 
 import Extra.Ord
 
 center :: AABB -> Point
-center aabb @ (AABB minP maxP) = maxP - (size aabb / 2)
+center aabb = aabb^.maxPoint - (size aabb / 2)
 
 size :: AABB -> Size
-size (AABB minP maxP) = abs $ maxP - minP
+size aabb = abs $ aabb^.maxPoint - aabb^.minPoint
 
 left :: AABB -> Float
-left shape = let (V2 x _) = minPoint shape in x
+left shape = shape^.minPoint._x
 
 right :: AABB -> Float
-right shape = let (V2 x _) = maxPoint shape in x
+right shape = shape^.maxPoint._x
 
 top :: AABB -> Float
-top shape = let (V2 _ y) = maxPoint shape in y
+top shape = shape^.maxPoint._y
 
 bottom :: AABB -> Float
-bottom shape = let (V2 _ y) = minPoint shape in y
+bottom shape = shape^.minPoint._y
 
 topLeft :: AABB -> Point
 topLeft shape = V2 (left shape) (top shape)
@@ -46,19 +47,11 @@ segments a =
     , Segment (bottomLeft a) (bottomRight a)
     ]
 
--- | Calculate the smallest point within the AABB
-minPoint :: AABB -> Point
-minPoint (AABB min _) = min
-
--- | Calculate the largest point within the AABB
-maxPoint :: AABB -> Point
-maxPoint (AABB _ max) = max
-
 -- | Returns true if the AABB contains the point
 containsPoint :: AABB -> Point -> Bool
 containsPoint a (V2 x y) = (x > minX && x < maxX) && (y > minY && y < maxY)
-  where (V2 minX minY) = minPoint a
-        (V2 maxX maxY) = maxPoint a
+  where (V2 minX minY) = a^.minPoint
+        (V2 maxX maxY) = a^.maxPoint
 
 -- | Returns true if the aabb contains the origin
 containsOrigin :: AABB -> Bool
@@ -73,7 +66,7 @@ containsOrigin shape = containsPoint shape (V2 0 0)
 -- |   the distance between the two shapes
 minkowskiDifference :: AABB -> AABB -> AABB
 minkowskiDifference a b = AABB mdMin mdMax
-  where (V2 mdLeft mdBottom) = minPoint a - maxPoint b
+  where (V2 mdLeft mdBottom) = a^.minPoint - b^.maxPoint
         (V2 mdWidth mdHeight) = size a + size b
         mdMin = V2 mdLeft mdBottom
         mdMax = V2 (mdLeft + mdWidth) (mdBottom + mdHeight)

@@ -1,23 +1,40 @@
+{-# LANGUAGE DuplicateRecordFields  #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE FlexibleInstances      #-}
+{-# LANGUAGE MultiParamTypeClasses  #-}
+{-# LANGUAGE TypeSynonymInstances   #-}
+{-# LANGUAGE TemplateHaskell        #-}
+
 module Physics.Shape.Types where
 
-import Linear.V2
+import Control.Lens
 import Data.Ecstasy
+import Linear.V2
 
 type Point = V2 Float
 type Size = V2 Float
 type FrameMovement = V2 Float
 
--- | An infinite line passing through the given points
-data Line = Line Point Point
-  deriving Show
+-- | An infinite line passing through `startPoint` and `endPoint`
+data Line = Line
+  { _startPoint :: Point
+  , _endPoint :: Point
+  } deriving Show
 
--- | A bounded line with a start point and end point
-data Segment = Segment Point Point
-  deriving Show
+-- | A bounded line start at `startPoint` and ending at `endPoint`
+data Segment = Segment
+  { _startPoint :: Point
+  , _endPoint :: Point
+  } deriving Show
 
--- | An axis-aligned bounding box with a center point and size
-data AABB = AABB Point Point
-  deriving Show
+data AABB = AABB
+  { _minPoint :: Point -- ^ the smallest point of the AABB, i.e. the bottom left
+  , _maxPoint :: Point -- ^ the largest point of the AABB, i.e. the top right
+  } deriving (Show)
+
+makeFieldsNoPrefix ''Line
+makeFieldsNoPrefix ''Segment
+makeFieldsNoPrefix ''AABB
 
 data CollisionModel = DynamicAABB AABB FrameMovement
                     | StaticAABB AABB

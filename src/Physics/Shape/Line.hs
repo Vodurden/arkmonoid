@@ -2,6 +2,7 @@ module Physics.Shape.Line where
 
 import Physics.Shape.Types
 
+import Control.Lens
 import Linear.V2
 import Linear.V3
 import Linear.Matrix
