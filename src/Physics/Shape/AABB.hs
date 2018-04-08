@@ -8,6 +8,22 @@ import Linear.V2
 
 import Extra.Ord
 
+-- | Construct a AABB with a given width and height at a given point
+mkAABB :: Point -> Size -> AABB
+mkAABB p s =
+  let extents = (s/2)
+  in AABB (p - extents) (p + extents)
+
+-- | Move the AABB by the given amount
+moveBy :: V2 Float -> AABB -> AABB
+moveBy amount = over minPoint (+amount) . over maxPoint (+amount)
+
+-- | Moves the AABB to the given point
+moveTo :: Point -> AABB -> AABB
+moveTo p aabb =
+  let movementAmount = p - center aabb
+  in moveBy movementAmount aabb
+
 center :: AABB -> Point
 center aabb = aabb^.maxPoint - (size aabb / 2)
 
@@ -30,10 +46,10 @@ topLeft :: AABB -> Point
 topLeft shape = V2 (left shape) (top shape)
 
 topRight :: AABB -> Point
-topRight shape = V2 (right shape) (top shape)
+topRight shape = shape^.maxPoint
 
 bottomLeft :: AABB -> Point
-bottomLeft shape = V2 (left shape) (bottom shape)
+bottomLeft shape = shape^.minPoint
 
 bottomRight :: AABB -> Point
 bottomRight shape = V2 (right shape) (bottom shape)
@@ -41,11 +57,11 @@ bottomRight shape = V2 (right shape) (bottom shape)
 -- | Returns a list of lines that make up this AABB
 segments :: AABB -> [Segment]
 segments a =
-    [ Segment (topLeft a) (topRight a)
-    , Segment (topRight a) (bottomRight a)
-    , Segment (topLeft a) (bottomLeft a)
-    , Segment (bottomLeft a) (bottomRight a)
-    ]
+  let tl = topLeft a
+      tr = topRight a
+      bl = bottomLeft a
+      br = bottomRight a
+  in [ Segment tl tr, Segment tr br, Segment tl bl, Segment bl br]
 
 -- | Returns true if the AABB contains the point
 containsPoint :: AABB -> Point -> Bool
@@ -99,9 +115,11 @@ closestPointOnBoundsToPoint p a = closest
 -- | The penetration vector is a vector that can be applied to
 -- | shape 1 to ensure both shapes are no longer overlapping.
 penetration :: AABB -> AABB -> Maybe (V2 Float)
-penetration a b | overlapping a b = Just penetrationVector
-  where penetrationVector = closestPointOnBoundsToPoint (V2 0 0) (minkowskiDifference a b)
-penetration _ _ = Nothing
+penetration a b =
+    if containsOrigin minkowski
+    then Just (closestPointOnBoundsToPoint (V2 0 0) minkowski)
+    else Nothing
+  where minkowski = minkowskiDifference a b
 
 -- | Returns true if both shapes overlap
 overlapping :: AABB -> AABB -> Bool

@@ -1,7 +1,6 @@
 module Extra.V2 where
 
 import Linear.V2
-import Linear.Matrix
 import Linear.Metric
 
 -- | Outputs a vector by reflecting it across another vector

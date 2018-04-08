@@ -1,12 +1,16 @@
 module Render (display, backgroundColor, render) where
 
-import Data.Ecstasy
-import Linear.V2
-import Graphics.Gloss.Interface.Pure.Game as G
-import qualified Graphics.Gloss.Data.Color as G
+import           Extra.List
+import           Physics.Types
+import           Physics.Shape.Types
+import qualified Physics.Shape.AABB as AABB
+import           Types
 
-import Types
-import Extra.List
+import           Control.Lens
+import           Data.Ecstasy
+import qualified Graphics.Gloss.Data.Color as G
+import           Graphics.Gloss.Interface.Pure.Game as G
+import           Linear.V2
 
 -- | Configures the display window of the game
 display :: G.Display
@@ -24,15 +28,17 @@ render = do
 
 renderGame :: GameSystem Picture
 renderGame = do
-    pictures <- (efor . const) $ do
-      (V2 x y) <- get position
-      geometry <- get geometry
-      color <- getMaybe Types.color
-      let colorFn = maybe id G.Color color
-      pure $ colorFn $ G.Translate x y $ geometryPicture geometry
+    pics <- (efor . const) entPicture
+    pure $ Pictures pics
 
-    pure $ Pictures pictures
+entPicture :: (Monad m) => GameQueryT m G.Picture
+entPicture = do
+  obj <- get physicalObject
+  let physicsShape = obj^.shape
+  let (V2 x y) = AABB.center physicsShape
+  let (V2 w h) = AABB.size physicsShape
 
--- | Construct a picture given some geometry
-geometryPicture :: Geometry -> G.Picture
-geometryPicture (Box w h) = rectangleSolid w h
+  color <- getMaybe Types.color
+  let colorFn = maybe id G.Color color
+
+  pure $ colorFn $ G.Translate x y $ rectangleSolid w h

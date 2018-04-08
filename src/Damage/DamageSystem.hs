@@ -1,24 +1,23 @@
 module Damage.DamageSystem where
 
 import Control.Monad
-import Data.Foldable
 import Data.Ecstasy
-import Extra.Ecstasy
+import Data.Foldable
 import Data.Maybe
-import qualified Data.Map.Strict as Map
+import Extra.Ecstasy
 
-import Types
-import Physics.Shape.Types
-import qualified Physics.PhysicsSystem as PhysicsSystem
+import           Types
+import           Physics.CollisionDetection.Types
+import qualified Physics.CollisionDetection.GameCollisions as GameCollisions
 
-step :: Map.Map Ent [Collision] -> GameSystem ()
+step :: GameCollisions Ent -> GameSystem ()
 step collisions = do
   damageCollidingEntities collisions
   killDeadEntities
 
-damageCollidingEntities :: Map.Map Ent [Collision] -> GameSystem ()
+damageCollidingEntities :: GameCollisions Ent -> GameSystem ()
 damageCollidingEntities collisions =
-    let collidingEnts = PhysicsSystem.collidingEnts collisions
+    let collidingEnts = GameCollisions.collidingIds collisions
     in traverse_ (uncurry damageFromTo) collidingEnts
   where
     -- | Apply damage from the damager to the damagee

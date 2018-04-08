@@ -1,10 +1,15 @@
 module Input (handleInput) where
 
-import Data.Ecstasy
-import Linear.V2
-import Graphics.Gloss.Interface.Pure.Game
+import qualified Physics.Shape.AABB as AABB
+import           Physics.Types
+import           Types
 
-import Types
+import Control.Monad (guard)
+import Control.Lens
+import Data.Ecstasy
+import Graphics.Gloss.Interface.Pure.Game
+import Linear.V2
+import Linear.Epsilon (nearZero)
 
 handleInput :: Event -> GameSystem ()
 handleInput event =
@@ -22,10 +27,15 @@ handleFollowMouse :: Event -> GameSystem ()
 handleFollowMouse (EventMotion (xPos, yPos)) =
   emap $ do
     (FollowMouse followX followY) <- get followMouse
-    (V2 x y) <- get position
+    phys <- get physicalObject
+    let (V2 x y) = AABB.center (phys^.shape)
     let impulseX = if followX then xPos - x else 0
     let impulseY = if followY then yPos - y else 0
     let newImpulse = V2 impulseX impulseY
-    pure defEntity'
-      { impulse = Set newImpulse }
+
+    guard (not $ nearZero newImpulse)
+
+    let newPhysicalObject = phys & impulse .~ newImpulse
+    pure $ defEntity'
+      { physicalObject = Set newPhysicalObject }
 handleFollowMouse _ = pure ()

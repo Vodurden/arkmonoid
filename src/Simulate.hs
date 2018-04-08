@@ -8,8 +8,10 @@ import Linear.V2
 import Control.Monad
 import qualified Graphics.Gloss.Data.Color as G
 
-import Types
-import Extra.Ecstasy
+import           Types
+import           Extra.Ecstasy
+import           Physics.Types
+import qualified Physics.Shape.AABB as AABB
 import qualified Physics.PhysicsSystem as PhysicsSystem
 import qualified Damage.DamageSystem as DamageSystem
 
@@ -36,8 +38,13 @@ step delta = do
 -- TODO: An actual level system.
 paddle :: GameSystem ()
 paddle = void $ newEntity $ defEntity
-  { position = Just (V2 0 (-215))
-  , geometry = Just $ Box 100 15
+  { physicalObject = Just PhysicalObject
+    { _velocity = V2 0 0
+    , _impulse  = V2 0 0
+    , _shape = AABB.mkAABB (V2 0 (-215)) (V2 100 15)
+    , _material = Paddle
+    }
+
   , Types.color = Just G.red
 
   , frozen = Just ()
@@ -46,9 +53,13 @@ paddle = void $ newEntity $ defEntity
 
 ball :: GameSystem ()
 ball = void $ newEntity $ defEntity
-  { position = Just (V2 (-50) (-180))
-  , velocity = Just (V2 250 (-250))
-  , geometry = Just $ Box 10 10
+  { physicalObject = Just PhysicalObject
+    { _velocity = V2 250 (250)
+    , _impulse = V2 0 0
+    , _shape = AABB.mkAABB (V2 (-50) (-180)) (V2 10 10)
+    , _material = Ball
+    }
+
   , Types.color = Just G.red
 
   , frozen = Just ()
@@ -59,8 +70,13 @@ ball = void $ newEntity $ defEntity
 
 block :: G.Color -> V2 Float -> GameSystem ()
 block color pos = void $ newEntity $ defEntity
-  { position = Just pos
-  , geometry = Just $ Box 50 15
+  { physicalObject = Just PhysicalObject
+    { _velocity = V2 0 0
+    , _impulse = V2 0 0
+    , _shape = AABB.mkAABB pos (V2 50 15)
+    , _material = Solid
+    }
+
   , Types.color = Just color
   , health = Just 1
   }
