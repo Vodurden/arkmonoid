@@ -43,35 +43,50 @@ resolvePosition collision obj = case collision of
 
 -- | Updates the objects velocity as a result of the collision.
 resolveVelocity :: forall id. GameCollision id -> GameObject id -> GameObject id
-resolveVelocity c = forceBounceUp c . bounce c
+resolveVelocity c =
+    onMaterialCombo Ball Paddle forceBounceUp c
+    . onMaterial Ball bounce c
   where
-    -- | Force the ball to bounce up for some material combinations.
-    forceBounceUp :: GameCollision id -> GameObject id -> GameObject id
-    forceBounceUp collision obj =
-        if shouldForceBounceUp
-        then over (physical.velocity) bounceUp obj
+    -- | Triggers the given function when the object/collision material requirements are met.
+    onMaterialCombo :: Material -> Material
+                    -> (GameCollision id -> GameObject id -> GameObject id)
+                    -> GameCollision id -> GameObject id -> GameObject id
+    onMaterialCombo objMaterial collisionMaterial f collision obj =
+        if hasMaterialCombo
+        then f collision obj
         else obj
+      where
+        hasMaterialCombo = objHasMaterial && collisionHasMaterial
+        objHasMaterial = obj^.physical.material == objMaterial
+        collisionHasMaterial = GameCollision.hasMaterial collision collisionMaterial
+
+    onMaterial :: Material
+               -> (GameCollision id -> GameObject id -> GameObject id)
+               -> GameCollision id -> GameObject id -> GameObject id
+    onMaterial objMaterial f collision obj =
+      if obj^.physical.material == objMaterial
+      then f collision obj
+      else obj
+
+    -- | Force the object to bounce up
+    forceBounceUp :: GameCollision id -> GameObject id -> GameObject id
+    forceBounceUp _ = over (physical.velocity) bounceUp
       where
         bounceUp :: V2 Float -> V2 Float
         bounceUp (V2 x y) = V2 x (abs y)
 
-        shouldForceBounceUp = objIsBall && collisionHasPaddle
-        objIsBall = obj^.physical.material == Ball
-        collisionHasPaddle = GameCollision.hasMaterial collision Paddle
-
-    -- | Bounces the object if it should be bounced
+    -- | Bounces the object
     bounce :: GameCollision id -> GameObject id -> GameObject id
-    bounce collision obj | obj^.physical.material == Ball =
-      let v = obj^.physical.velocity
-          newV = reflectByCollision collision v
-      in set (physical.velocity) newV obj
-    bounce _ obj = obj
-
-    reflectByCollision :: GameCollision id -> V2 Float -> V2 Float
-    reflectByCollision (GBoundaryCollision _ collisions) vel =
-      foldr (\b v -> reflect v (b^.boundaryCollision.penetrationVector)) vel collisions
-    reflectByCollision (GExistingCollision _ collisions) vel =
-      foldr (\b v -> reflect v (b^.existingCollision.penetrationVector)) vel collisions
-    reflectByCollision (GImpendingCollision _ imp) vel =
-      let reflectVector = Segment.normalVector (imp^.impendingCollision.segment)
-      in reflect vel reflectVector
+    bounce collision obj =
+        let v = obj^.physical.velocity
+            newV = reflectByCollision collision v
+        in set (physical.velocity) newV obj
+      where
+        reflectByCollision :: GameCollision id -> V2 Float -> V2 Float
+        reflectByCollision (GBoundaryCollision _ collisions) vel =
+          foldr (\b v -> reflect v (b^.boundaryCollision.penetrationVector)) vel collisions
+        reflectByCollision (GExistingCollision _ collisions) vel =
+          foldr (\b v -> reflect v (b^.existingCollision.penetrationVector)) vel collisions
+        reflectByCollision (GImpendingCollision _ imp) vel =
+          let reflectVector = Segment.normalVector (imp^.impendingCollision.segment)
+          in reflect vel reflectVector
