@@ -18,7 +18,6 @@ data Entity' f = Entity
   , health          :: Component f 'Field Int -- ^ amount of damage this entity can sustain
   , damage          :: Component f 'Field Int -- ^ amount of damage this entity does on collision
   , color           :: Component f 'Field G.Color
-  , bouncy          :: Component f 'Field ()
   , followMouse     :: Component f 'Field FollowMouse
   , debug           :: Component f 'Field ()
   }

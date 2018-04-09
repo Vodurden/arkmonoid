@@ -63,7 +63,6 @@ ball = void $ newEntity $ defEntity
   , Types.color = Just G.red
 
   , frozen = Just ()
-  , bouncy = Just ()
 
   , damage = Just 1
   }
