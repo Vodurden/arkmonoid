@@ -31,6 +31,7 @@
 -- |
 module Physics.PhysicsSystem where
 
+import           Control.Monad (guard)
 import           Extra.Ecstasy
 import           Physics.Types
 import qualified Physics.CollisionDetection.Detection as CollisionDetection
@@ -81,6 +82,11 @@ updateEntities :: [GameObject Ent] -> GameSystem ()
 updateEntities = traverse_ updateEntity
   where updateEntity :: GameObject Ent -> GameSystem ()
         updateEntity obj = forEnt (obj^.identifier) $ do
+          -- Don't update if nothing has changed
+          currentPhysicalObj <- get physicalObject
+          let newPhysicalObject = obj^.physical
+          guard (currentPhysicalObj /= newPhysicalObject)
+
           pure $ defEntity'
             { physicalObject = Set $ obj^.physical
             }
