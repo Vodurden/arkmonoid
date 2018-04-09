@@ -16,7 +16,7 @@ import Control.Lens
 -- |
 -- | Some material combinations may also have special interaction rules.
 data Material = Solid | Ball | Paddle
-  deriving (Show, Eq)
+  deriving (Show, Eq, Ord)
 
 -- | Represents a boundary of the world. We assume that nothing is allowed to move past
 -- | this boundary.

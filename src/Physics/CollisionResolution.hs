@@ -5,6 +5,7 @@ module Physics.CollisionResolution where
 
 import           Physics.Types
 import           Physics.CollisionDetection.Types
+import qualified Physics.CollisionDetection.GameCollision as GameCollision
 import qualified Physics.GameObject as GameObject
 import qualified Physics.Shape.Segment as Segment
 
@@ -42,8 +43,22 @@ resolvePosition collision obj = case collision of
 
 -- | Updates the objects velocity as a result of the collision.
 resolveVelocity :: forall id. GameCollision id -> GameObject id -> GameObject id
-resolveVelocity = bounce
+resolveVelocity c = forceBounceUp c . bounce c
   where
+    -- | Force the ball to bounce up for some material combinations.
+    forceBounceUp :: GameCollision id -> GameObject id -> GameObject id
+    forceBounceUp collision obj =
+        if shouldForceBounceUp
+        then over (physical.velocity) bounceUp obj
+        else obj
+      where
+        bounceUp :: V2 Float -> V2 Float
+        bounceUp (V2 x y) = V2 x (abs y)
+
+        shouldForceBounceUp = objIsBall && collisionHasPaddle
+        objIsBall = obj^.physical.material == Ball
+        collisionHasPaddle = GameCollision.hasMaterial collision Paddle
+
     -- | Bounces the object if it should be bounced
     bounce :: GameCollision id -> GameObject id -> GameObject id
     bounce collision obj | obj^.physical.material == Ball =
