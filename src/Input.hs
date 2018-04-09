@@ -19,8 +19,12 @@ handleInput event =
 unfreezeOnLeftClick :: Event -> GameSystem ()
 unfreezeOnLeftClick (EventKey (MouseButton LeftButton) _ _ _) =
   emap $ do
-    with frozen
-    pure defEntity' { frozen = Unset }
+    phys <- get physicalObject
+
+    -- Don't update if we're already unfrozen.
+    guard (phys^.frozen /= False)
+
+    pure defEntity' { physicalObject = Set (set frozen False phys) }
 unfreezeOnLeftClick _ = pure ()
 
 handleFollowMouse :: Event -> GameSystem ()

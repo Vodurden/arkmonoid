@@ -14,7 +14,6 @@ data FollowMouse = FollowMouse Bool Bool -- Follow mouse on the X-axis/Y-axis/bo
 data Entity' f = Entity
   { entId           :: Component f 'Field Ent
   , physicalObject  :: Component f 'Field PhysicalObject
-  , frozen          :: Component f 'Field ()
   , health          :: Component f 'Field Int -- ^ amount of damage this entity can sustain
   , damage          :: Component f 'Field Int -- ^ amount of damage this entity does on collision
   , color           :: Component f 'Field G.Color

@@ -17,13 +17,19 @@ simulate :: (Ord id) => Float -> GameCollisions id -> [GameObject id] -> [GameOb
 simulate delta collisions = fmap (simulateObject delta collisions)
 
 simulateObject :: forall id. (Ord id) => Float -> GameCollisions id -> GameObject id -> GameObject id
-simulateObject delta collisions obj = clearImpulse $ moveOrCollide obj
+simulateObject delta collisions = simulateIfUnfrozen
   where
+    simulateIfUnfrozen :: GameObject id -> GameObject id
+    simulateIfUnfrozen obj =
+      if not (obj^.physical.frozen)
+      then clearImpulse $ moveOrCollide obj
+      else obj
+
     moveOrCollide :: GameObject id -> GameObject id
-    moveOrCollide =
+    moveOrCollide obj =
       case Map.lookup (obj^.identifier) collisions of
-        (Just collision) -> CollisionResolution.resolveCollision collision
-        Nothing -> GameObject.moveObject delta
+        (Just collision) -> CollisionResolution.resolveCollision collision obj
+        Nothing -> GameObject.moveObject delta obj
 
     clearImpulse :: GameObject id -> GameObject id
     clearImpulse = set (physical.impulse) (V2 0 0)

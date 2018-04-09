@@ -43,11 +43,11 @@ paddle = void $ newEntity $ defEntity
     , _impulse  = V2 0 0
     , _shape = AABB.mkAABB (V2 0 (-215)) (V2 100 15)
     , _material = Paddle
+    , _frozen = True
     }
 
   , Types.color = Just G.red
 
-  , frozen = Just ()
   , followMouse = Just (FollowMouse True False)
   }
 
@@ -58,11 +58,10 @@ ball = void $ newEntity $ defEntity
     , _impulse = V2 0 0
     , _shape = AABB.mkAABB (V2 (-50) (-180)) (V2 10 10)
     , _material = Ball
+    , _frozen = True
     }
 
   , Types.color = Just G.red
-
-  , frozen = Just ()
 
   , damage = Just 1
   }
@@ -74,6 +73,7 @@ block color pos = void $ newEntity $ defEntity
     , _impulse = V2 0 0
     , _shape = AABB.mkAABB pos (V2 50 15)
     , _material = Solid
+    , _frozen = True
     }
 
   , Types.color = Just color

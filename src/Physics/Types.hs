@@ -33,6 +33,7 @@ data PhysicalObject = PhysicalObject
   , _impulse  :: Impulse
   , _shape    :: AABB
   , _material :: Material
+  , _frozen   :: Bool
   } deriving (Show, Eq)
 makeFieldsNoPrefix ''PhysicalObject
 
