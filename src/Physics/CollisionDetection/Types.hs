@@ -20,9 +20,6 @@ import Linear.V2
 -- | the collision
 type PenetrationVector = V2 Float
 
--- | Represents distance travelled in pixels
-type Distance = Float
-
 -- | A ray, used for ray tracing.
 type Ray = Segment
 

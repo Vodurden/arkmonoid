@@ -42,8 +42,8 @@ pointCollision _ _ = Nothing
 
 -- | Returns true if the point is beyond the boundary
 pointBeyondBoundary :: Boundary -> Point -> Bool
-pointBeyondBoundary (LeftBoundary  line _) p = Line.pointDeterminant line p > 0
-pointBeyondBoundary (RightBoundary line _) p = Line.pointDeterminant line p < 0
+pointBeyondBoundary (LeftBoundary  line _) p = Line.pointDeterminant line p >= 0
+pointBeyondBoundary (RightBoundary line _) p = Line.pointDeterminant line p <= 0
 
 boundaryLine :: Boundary -> Line
 boundaryLine (LeftBoundary line _) = line

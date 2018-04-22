@@ -11,6 +11,9 @@ import Physics.Shape.Types
 
 import Control.Lens
 
+-- | Represents distance travelled in pixels
+type Distance = Float
+
 -- | Represents the material the object is made from. This can be used
 -- | to affect the behavior of the object when a collision occurs.
 -- |
@@ -27,7 +30,7 @@ data Boundary = LeftBoundary  Line Material
               | RightBoundary Line Material
   deriving Show
 
--- | An object to be physicall simulated by the physics system
+-- | An object to be physically simulated by the physics system
 data PhysicalObject = PhysicalObject
   { _velocity :: Velocity
   , _impulse  :: Impulse

@@ -13,14 +13,19 @@ import Control.Lens
 import Extra.V2 (reflect)
 import Linear.V2
 
+type CollisionResolver id = GameCollision id -> GameObject id -> GameObject id
+type CollisionMatcher id = GameCollision id -> GameObject id -> Bool
+
+data PointCollision = PointCollision
+
 -- | Resolves the collisions on an object
-resolveCollision :: GameCollision id -> GameObject id -> GameObject id
+resolveCollision :: CollisionResolver id
 resolveCollision collision =
   resolveVelocity collision
   . resolvePosition collision
 
 -- | Updates the objects position such that it is no longer colliding
-resolvePosition :: GameCollision id -> GameObject id -> GameObject id
+resolvePosition :: CollisionResolver id
 resolvePosition collision obj = case collision of
     (GBoundaryCollision _ collisions) -> foldr resolvePositionBoundary obj collisions
     (GExistingCollision _ collisions) -> foldr resolvePositionExisting obj collisions
@@ -42,15 +47,13 @@ resolvePosition collision obj = case collision of
       in GameObject.moveObjectTo collisionPoint obj
 
 -- | Updates the objects velocity as a result of the collision.
-resolveVelocity :: forall id. GameCollision id -> GameObject id -> GameObject id
+resolveVelocity :: forall id. CollisionResolver id
 resolveVelocity c =
     onMaterialCombo Ball Paddle forceBounceUp c
     . onMaterial Ball bounce c
   where
     -- | Triggers the given function when the object/collision material requirements are met.
-    onMaterialCombo :: Material -> Material
-                    -> (GameCollision id -> GameObject id -> GameObject id)
-                    -> GameCollision id -> GameObject id -> GameObject id
+    onMaterialCombo :: Material -> Material -> (CollisionResolver id) -> CollisionResolver id
     onMaterialCombo objMaterial collisionMaterial f collision obj =
         if hasMaterialCombo
         then f collision obj
@@ -60,20 +63,22 @@ resolveVelocity c =
         objHasMaterial = obj^.physical.material == objMaterial
         collisionHasMaterial = GameCollision.hasMaterial collision collisionMaterial
 
-    onMaterial :: Material
-               -> (GameCollision id -> GameObject id -> GameObject id)
-               -> GameCollision id -> GameObject id -> GameObject id
+    onMaterial :: Material -> (CollisionResolver id) -> CollisionResolver id
     onMaterial objMaterial f collision obj =
       if obj^.physical.material == objMaterial
       then f collision obj
       else obj
 
+    nearXEdge :: Float -> (CollisionResolver id) -> CollisionResolver id
+    nearXEdge pct resolver collision obj = undefined
+
+    -- | Force the object to invert it's X velocity
+    forceReverseX :: GameCollision id -> GameObject id -> GameObject id
+    forceReverseX _ = over (physical.velocity._x) negate
+
     -- | Force the object to bounce up
     forceBounceUp :: GameCollision id -> GameObject id -> GameObject id
-    forceBounceUp _ = over (physical.velocity) bounceUp
-      where
-        bounceUp :: V2 Float -> V2 Float
-        bounceUp (V2 x y) = V2 x (abs y)
+    forceBounceUp _ = over (physical.velocity._y) abs
 
     -- | Bounces the object
     bounce :: GameCollision id -> GameObject id -> GameObject id

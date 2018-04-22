@@ -20,14 +20,14 @@ type FrameMovement = V2 Float
 data Line = Line
   { _startPoint :: Point
   , _endPoint :: Point
-  } deriving Show
+  } deriving (Show, Eq)
 makeFieldsNoPrefix ''Line
 
 -- | A bounded line start at `startPoint` and ending at `endPoint`
 data Segment = Segment
   { _startPoint :: Point
   , _endPoint :: Point
-  } deriving Show
+  } deriving (Show, Eq)
 makeFieldsNoPrefix ''Segment
 
 data AABB = AABB
