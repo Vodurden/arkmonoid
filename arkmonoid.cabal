@@ -3,29 +3,66 @@
 
 name:                arkmonoid
 version:             0.1.0.0
--- synopsis:
--- description:
 license:             BSD3
 license-file:        LICENSE
 author:              Jake Woods
 maintainer:          jake@jakewoods.net
--- copyright:
 category:            Game
 build-type:          Simple
 extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
+library
+  build-depends:       base >=4.9 && <4.11, ecstasy, linear, gloss, transformers, containers, lens
+  exposed-modules:     Arkmonoid
+  other-modules:       Arkmonoid.Damage.DamageSystem
+                       Arkmonoid.Extra.Ecstasy
+                       Arkmonoid.Extra.List
+                       Arkmonoid.Extra.Maybe
+                       Arkmonoid.Extra.Ord
+                       Arkmonoid.Input
+                       Arkmonoid.Extra.V2
+                       Arkmonoid.Physics.CollisionDetection.BoundaryCollision
+                       Arkmonoid.Physics.CollisionDetection.Detection
+                       Arkmonoid.Physics.CollisionDetection.ExistingCollision
+                       Arkmonoid.Physics.CollisionDetection.GameCollision
+                       Arkmonoid.Physics.CollisionDetection.GameCollisions
+                       Arkmonoid.Physics.CollisionDetection.ImpendingCollision
+                       Arkmonoid.Physics.CollisionDetection.Raytrace
+                       Arkmonoid.Physics.CollisionDetection.Types
+                       Arkmonoid.Physics.CollisionResolution
+                       Arkmonoid.Physics.GameObject
+                       Arkmonoid.Physics.PhysicalObject
+                       Arkmonoid.Physics.PhysicsSystem
+                       Arkmonoid.Physics.Shape.AABB
+                       Arkmonoid.Physics.Shape.Line
+                       Arkmonoid.Physics.Shape.Segment
+                       Arkmonoid.Physics.Shape.Types
+                       Arkmonoid.Physics.Simulation
+                       Arkmonoid.Physics.Types
+                       Arkmonoid.Render
+                       Arkmonoid.Simulate
+                       Arkmonoid.Types
+  hs-source-dirs:      library/
+  ghc-options:
+    -O2
+    -optc-O3
+    -optc-ffast-math
+    -funfolding-use-threshold=16
+  default-language:    Haskell2010
+
+
 executable arkmonoid
   main-is:             Main.hs
-  -- other-modules:
-  -- other-extensions:
-  build-depends:       base >=4.9 && <4.11, ecstasy, linear, gloss, transformers, containers,
-                       lens
-  hs-source-dirs:      src
+  build-depends:       base >=4.9 && <4.11, arkmonoid
+  hs-source-dirs:      executable
   ghc-options:
-              -O2
-              -threaded
-              -fprof-auto
-              -rtsopts
-              "-with-rtsopts=-N -p -hc -i0.1"
+    -O2
+    -optc-O3
+    -optc-ffast-math
+    -threaded
+    -fprof-auto
+    -rtsopts
+    -funfolding-use-threshold=16
+    "-with-rtsopts=-N -p -hc -i0.1"
   default-language:    Haskell2010
