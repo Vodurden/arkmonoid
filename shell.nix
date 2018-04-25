@@ -1,4 +1,4 @@
-{ nixpkgs ? import <nixos-unstable> {}, compiler ? "ghc802", doBenchmark ? false }:
+{ nixpkgs ? import <nixos-unstable> {}, compiler ? "ghc822", doBenchmark ? false }:
 
 let
   pkgs = nixpkgs;
@@ -16,7 +16,7 @@ let
       # OpenGLRaw segfaults when we try to build it's haddocks
       OpenGLRaw = pkgs.haskell.lib.dontHaddock haskellOld.OpenGLRaw;
 
-      # these tests take _forever_ 
+      # these tests take _forever_
       linear = pkgs.haskell.lib.dontCheck haskellOld.linear;
       happy = pkgs.haskell.lib.dontCheck haskellOld.happy;
     };

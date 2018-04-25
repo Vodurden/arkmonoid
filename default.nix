@@ -1,5 +1,14 @@
-{ mkDerivation, base, ecstasy, gloss, linear, stdenv, transformers, darwin, containers, flamegraph
-, lens, ghc-prof-flamegraph, profiteur
+{ # Nix dependencies
+  mkDerivation, darwin
+
+  # Haskell lib dependencies
+  , base, ecstasy, gloss, linear, stdenv, transformers, containers, lens
+
+  # Haskell test dependencies
+  , tasty, tasty-discover, tasty-hunit, HUnit, tasty-hedgehog, hedgehog
+
+  # Extra exeecutables
+  , flamegraph, ghc-prof-flamegraph
 }:
 mkDerivation {
   pname = "arkmonoid";
@@ -7,9 +16,10 @@ mkDerivation {
   src = ./.;
   isLibrary = false;
   isExecutable = true;
-  buildDepends = [profiteur flamegraph ghc-prof-flamegraph] ++ (if stdenv.isDarwin then [darwin.apple_sdk.frameworks.OpenGL] else []);
+  buildDepends = [flamegraph ghc-prof-flamegraph] ++ (if stdenv.isDarwin then [darwin.apple_sdk.frameworks.OpenGL] else []);
   executableHaskellDepends = [
     base ecstasy gloss linear transformers containers lens
+    tasty tasty-discover tasty-hunit HUnit tasty-hedgehog hedgehog
   ];
   license = stdenv.lib.licenses.bsd3;
 }

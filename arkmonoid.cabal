@@ -15,7 +15,7 @@ cabal-version:       >=1.10
 library
   build-depends:       base >=4.9 && <4.11, ecstasy, linear, gloss, transformers, containers, lens
   exposed-modules:     Arkmonoid
-  other-modules:       Arkmonoid.Damage.DamageSystem
+                       Arkmonoid.Damage.DamageSystem
                        Arkmonoid.Extra.Ecstasy
                        Arkmonoid.Extra.List
                        Arkmonoid.Extra.Maybe
@@ -45,18 +45,28 @@ library
                        Arkmonoid.Types
   hs-source-dirs:      library/
   ghc-options:
+    -Wall
     -O2
     -optc-O3
     -optc-ffast-math
     -funfolding-use-threshold=16
   default-language:    Haskell2010
 
+test-suite test
+  type: exitcode-stdio-1.0
+  main-is: Driver.hs
+  hs-source-dirs: test
+  build-depends: base >=4.9 && <4.11, arkmonoid, tasty, tasty-discover,
+                 tasty-hunit, HUnit, tasty-hedgehog, hedgehog
+  other-modules: Arkmonoid.Extra.ListTest
+  default-language:    Haskell2010
 
 executable arkmonoid
   main-is:             Main.hs
   build-depends:       base >=4.9 && <4.11, arkmonoid
   hs-source-dirs:      executable
   ghc-options:
+    -Wall
     -O2
     -optc-O3
     -optc-ffast-math
