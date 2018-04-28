@@ -46,6 +46,10 @@ library
   hs-source-dirs:      library/
   ghc-options:
     -Wall
+    -Wcompat
+    -Wincomplete-record-updates
+    -Wincomplete-uni-patterns
+    -Wredundant-constraints
     -O2
     -optc-O3
     -optc-ffast-math
@@ -55,10 +59,16 @@ library
 test-suite test
   type: exitcode-stdio-1.0
   main-is: Driver.hs
-  hs-source-dirs: test
   build-depends: base >=4.9 && <4.11, arkmonoid, tasty, tasty-discover,
                  tasty-hunit, HUnit, tasty-hedgehog, hedgehog
   other-modules: Data.List.ExtendedTest
+  hs-source-dirs: test
+  ghc-options:
+    -Wall
+    -Wcompat
+    -Wincomplete-record-updates
+    -Wincomplete-uni-patterns
+    -Wredundant-constraints
   default-language:    Haskell2010
 
 executable arkmonoid
