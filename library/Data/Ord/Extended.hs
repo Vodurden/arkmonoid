@@ -1,4 +1,11 @@
-module Arkmonoid.Extra.Ord where
+module Data.Ord.Extended
+  ( module Data.Ord
+  , clamp
+  , minBy
+  , maxBy
+  ) where
+
+import Data.Ord
 
 -- | Returns n if it is between low and high.
 -- | If it's lower then return low. Otherwise return high

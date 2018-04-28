@@ -4,9 +4,8 @@
 module Arkmonoid.Physics.CollisionResolution where
 
 import Control.Lens
-import Linear.V2
+import Linear.V2.Extended
 
-import           Arkmonoid.Extra.V2 (reflect)
 import           Arkmonoid.Physics.Types
 import           Arkmonoid.Physics.CollisionDetection.Types
 import qualified Arkmonoid.Physics.CollisionDetection.GameCollision as GameCollision

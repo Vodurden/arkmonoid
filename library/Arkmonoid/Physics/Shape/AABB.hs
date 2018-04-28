@@ -1,10 +1,10 @@
 module Arkmonoid.Physics.Shape.AABB where
 
 import Control.Lens
+import Data.Ord.Extended (clamp, minBy)
 import Linear.Metric
 import Linear.V2
 
-import Arkmonoid.Extra.Ord
 import Arkmonoid.Physics.Shape.Types
 
 -- | Construct a AABB with a given width and height at a given point

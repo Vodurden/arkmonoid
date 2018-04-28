@@ -7,7 +7,7 @@
   # Haskell test dependencies
   , tasty, tasty-discover, tasty-hunit, HUnit, tasty-hedgehog, hedgehog
 
-  # Extra exeecutables
+  # Extra executables
   , flamegraph, ghc-prof-flamegraph
 }:
 mkDerivation {

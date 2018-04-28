@@ -1,11 +1,10 @@
 module Arkmonoid.Damage.DamageSystem where
 
 import Control.Monad
-import Data.Ecstasy
+import Data.Ecstasy.Extended
 import Data.Foldable
 import Data.Maybe
 
-import           Arkmonoid.Extra.Ecstasy
 import           Arkmonoid.Types
 import           Arkmonoid.Physics.CollisionDetection.Types
 import qualified Arkmonoid.Physics.CollisionDetection.GameCollisions as GameCollisions

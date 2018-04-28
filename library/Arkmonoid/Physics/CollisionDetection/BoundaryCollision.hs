@@ -1,11 +1,10 @@
 module Arkmonoid.Physics.CollisionDetection.BoundaryCollision where
 
 import Control.Lens
-import Data.Maybe (catMaybes)
+import Data.Maybe.Extended (catMaybes, applyOrOther)
+import Data.Ord.Extended (maxBy)
 import Linear.Metric
 
-import           Arkmonoid.Extra.Ord
-import           Arkmonoid.Extra.Maybe
 import           Arkmonoid.Physics.Types
 import           Arkmonoid.Physics.CollisionDetection.Types
 import           Arkmonoid.Physics.Shape.Types

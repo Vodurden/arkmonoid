@@ -1,4 +1,9 @@
-module Arkmonoid.Extra.Maybe where
+module Data.Maybe.Extended
+  ( module Data.Maybe
+  , applyOrOther
+  ) where
+
+import Data.Maybe
 
 applyOrOther :: (a -> a -> a) -> Maybe a -> Maybe a -> Maybe a
 applyOrOther f (Just x) (Just y) = Just $ f x y

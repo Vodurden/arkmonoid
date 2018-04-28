@@ -1,6 +1,5 @@
-module Arkmonoid.Extra.ListTest where
+module Data.List.ExtendedTest where
 
-import           Control.Applicative ((<|>))
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
@@ -8,7 +7,7 @@ import           Test.Tasty
 import           Test.Tasty.HUnit
 import           Test.Tasty.Hedgehog
 
-import Arkmonoid.Extra.List
+import Data.List.Extended
 
 unit_pairs_smoketest :: IO ()
 unit_pairs_smoketest = assertEqual "for (pairs [1,2,3])" (pairs [1, 2, 3]) [(1,2), (1,3), (2,3)]

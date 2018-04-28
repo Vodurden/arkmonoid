@@ -1,4 +1,7 @@
-module Arkmonoid.Extra.V2 where
+module Linear.V2.Extended
+  ( module Linear.V2
+  , reflect
+  ) where
 
 import Linear.V2
 import Linear.Metric

@@ -3,12 +3,12 @@
 
 module Arkmonoid.Physics.CollisionDetection.Detection where
 
+import           Control.Lens
+import           Data.List.Extended
 import qualified Data.Map.Strict as Map
-import Data.Maybe (maybeToList)
-import Control.Lens
+import           Data.Maybe (maybeToList)
+import           Data.Ord.Extended (minBy)
 
-import           Arkmonoid.Extra.List (pairs)
-import           Arkmonoid.Extra.Ord (minBy)
 import           Arkmonoid.Physics.Types
 import           Arkmonoid.Physics.CollisionDetection.Types
 import qualified Arkmonoid.Physics.CollisionDetection.BoundaryCollision as BoundaryCollision

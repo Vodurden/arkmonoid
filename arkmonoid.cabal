@@ -16,12 +16,7 @@ library
   build-depends:       base >=4.9 && <4.11, ecstasy, linear, gloss, transformers, containers, lens
   exposed-modules:     Arkmonoid
                        Arkmonoid.Damage.DamageSystem
-                       Arkmonoid.Extra.Ecstasy
-                       Arkmonoid.Extra.List
-                       Arkmonoid.Extra.Maybe
-                       Arkmonoid.Extra.Ord
                        Arkmonoid.Input
-                       Arkmonoid.Extra.V2
                        Arkmonoid.Physics.CollisionDetection.BoundaryCollision
                        Arkmonoid.Physics.CollisionDetection.Detection
                        Arkmonoid.Physics.CollisionDetection.ExistingCollision
@@ -43,6 +38,11 @@ library
                        Arkmonoid.Render
                        Arkmonoid.Simulate
                        Arkmonoid.Types
+                       Data.Ecstasy.Extended
+                       Data.List.Extended
+                       Data.Maybe.Extended
+                       Data.Ord.Extended
+                       Linear.V2.Extended
   hs-source-dirs:      library/
   ghc-options:
     -Wall
@@ -58,7 +58,7 @@ test-suite test
   hs-source-dirs: test
   build-depends: base >=4.9 && <4.11, arkmonoid, tasty, tasty-discover,
                  tasty-hunit, HUnit, tasty-hedgehog, hedgehog
-  other-modules: Arkmonoid.Extra.ListTest
+  other-modules: Data.List.ExtendedTest
   default-language:    Haskell2010
 
 executable arkmonoid

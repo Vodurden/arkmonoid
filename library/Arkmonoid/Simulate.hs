@@ -2,14 +2,13 @@
 
 module Arkmonoid.Simulate (initializeWorld, step) where
 
-import Data.Ecstasy
+import Data.Ecstasy.Extended
 import Data.Foldable
 import Linear.V2
 import Control.Monad
 import qualified Graphics.Gloss.Data.Color as G
 
 import           Arkmonoid.Types
-import           Arkmonoid.Extra.Ecstasy
 import           Arkmonoid.Physics.Types
 import qualified Arkmonoid.Physics.Shape.AABB as AABB
 import qualified Arkmonoid.Physics.PhysicsSystem as PhysicsSystem

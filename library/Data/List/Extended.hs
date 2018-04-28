@@ -1,4 +1,8 @@
-module Arkmonoid.Extra.List where
+module Data.List.Extended
+  ( module Data.List
+  , pairs
+  , ifNonEmptyElse
+  ) where
 
 import Data.List
 

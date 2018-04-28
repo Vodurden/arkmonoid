@@ -1,11 +1,16 @@
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE DataKinds    #-}
 
-module Arkmonoid.Extra.Ecstasy where
+module Data.Ecstasy.Extended
+  ( module Data.Ecstasy
+  , forEnt
+  , eget
+  , emapIndexed
+  ) where
 
-import Data.Foldable (for_)
-import Data.Ecstasy
-import Control.Monad.Trans.Class (lift)
+import           Data.Foldable (for_)
+import           Data.Ecstasy
+import           Control.Monad.Trans.Class (lift)
 import qualified Control.Monad.Trans.State as S
 
 forEnt :: (HasWorld world, Monad m)

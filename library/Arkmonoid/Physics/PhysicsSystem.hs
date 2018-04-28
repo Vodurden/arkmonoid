@@ -33,12 +33,11 @@ module Arkmonoid.Physics.PhysicsSystem where
 
 import Control.Monad (guard)
 import Control.Lens
-import Data.Ecstasy
+import Data.Ecstasy.Extended
 import Data.Foldable
 import Data.Map (Map)
 import Linear.V2
 
-import           Arkmonoid.Extra.Ecstasy
 import qualified Arkmonoid.Physics.CollisionDetection.Detection as CollisionDetection
 import           Arkmonoid.Physics.CollisionDetection.Types
 import           Arkmonoid.Physics.Shape.Types
