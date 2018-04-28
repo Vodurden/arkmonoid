@@ -66,7 +66,7 @@ ball = void $ newEntity $ defEntity
   }
 
 block :: G.Color -> V2 Float -> GameSystem ()
-block color pos = void $ newEntity $ defEntity
+block blockColor pos = void $ newEntity $ defEntity
   { physicalObject = Just PhysicalObject
     { _velocity = V2 0 0
     , _impulse = V2 0 0
@@ -75,12 +75,12 @@ block color pos = void $ newEntity $ defEntity
     , _frozen = True
     }
 
-  , Arkmonoid.Types.color = Just color
+  , Arkmonoid.Types.color = Just blockColor
   , health = Just 1
   }
 
 blockLine :: G.Color -> V2 Float -> V2 Float -> Int -> GameSystem ()
-blockLine color start end blocks = traverse_ (block color) positions
+blockLine blockColor start end blocks = traverse_ (block blockColor) positions
   where
     scale = (abs $ end - start) / (fromIntegral blocks)
     positions = fmap (\i -> start + scale * fromIntegral i) [0..blocks]

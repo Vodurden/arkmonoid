@@ -20,10 +20,10 @@ resolveCollision collision =
 
 -- | Updates the objects position such that it is no longer colliding
 resolvePosition :: GameCollision id -> GameObject id -> GameObject id
-resolvePosition collision obj = case collision of
-    (GBoundaryCollision _ collisions) -> foldr resolvePositionBoundary obj collisions
-    (GExistingCollision _ collisions) -> foldr resolvePositionExisting obj collisions
-    (GImpendingCollision _ impending) -> resolvePositionImpending impending obj
+resolvePosition gameCollision gameObj = case gameCollision of
+    (GBoundaryCollision _ collisions) -> foldr resolvePositionBoundary gameObj collisions
+    (GExistingCollision _ collisions) -> foldr resolvePositionExisting gameObj collisions
+    (GImpendingCollision _ impending) -> resolvePositionImpending impending gameObj
   where
     resolvePositionBoundary :: GameBoundaryCollision id -> GameObject id -> GameObject id
     resolvePositionBoundary collision obj =

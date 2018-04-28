@@ -1,25 +1,19 @@
 module Arkmonoid.Physics.Shape.Segment where
 
 import Control.Monad
+import Control.Lens
 import Linear.V2
 import Linear.Metric
 import Linear.Epsilon
 
 import           Arkmonoid.Physics.Shape.Types
 import qualified Arkmonoid.Physics.Shape.Line as Line
-import qualified Arkmonoid.Physics.Shape.AABB as AABB
-
-start :: Segment -> Point
-start (Segment start _) = start
-
-end :: Segment -> Point
-end (Segment _ end) = end
 
 normalVector :: Segment -> V2 Float
 normalVector = Line.normalVector . Line.fromSegment
 
 length :: Segment -> Float
-length seg = distance (start seg) (end seg)
+length (Segment start end) = distance start end
 
 center :: Segment -> Point
 center (Segment start end) = (start + end) / 2.0
@@ -46,7 +40,7 @@ intersection seg1 seg2 = do
 intersectionFraction :: Segment -> Point -> Maybe Float
 intersectionFraction seg point
   | containsPoint seg point =
-      let intersectionSegment = Segment (start seg) point
+      let intersectionSegment = Segment (seg^.startPoint) point
           intersectionLength = Arkmonoid.Physics.Shape.Segment.length intersectionSegment
           segmentLength = Arkmonoid.Physics.Shape.Segment.length seg
       in Just $ intersectionLength / segmentLength

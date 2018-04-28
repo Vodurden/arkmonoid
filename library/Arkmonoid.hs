@@ -4,7 +4,6 @@ import qualified Control.Monad.Trans.State as S
 import           Data.Ecstasy
 import           Graphics.Gloss.Interface.Pure.Game
 
-import Arkmonoid.Types
 import Arkmonoid.Input
 import Arkmonoid.Simulate
 import Arkmonoid.Render

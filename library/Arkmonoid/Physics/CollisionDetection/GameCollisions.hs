@@ -1,6 +1,5 @@
 module Arkmonoid.Physics.CollisionDetection.GameCollisions where
 
-import           Control.Lens
 import qualified Data.Map.Strict as Map
 
 import qualified Arkmonoid.Physics.CollisionDetection.GameCollision as GameCollision

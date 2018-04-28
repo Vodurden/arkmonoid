@@ -2,13 +2,11 @@ module Arkmonoid.Render (display, backgroundColor, render) where
 
 import           Control.Lens
 import           Data.Ecstasy
-import           Data.List.Extended
 import qualified Graphics.Gloss.Data.Color as G
 import           Graphics.Gloss.Interface.Pure.Game as G
 import           Linear.V2
 
 import           Arkmonoid.Physics.Types
-import           Arkmonoid.Physics.Shape.Types
 import qualified Arkmonoid.Physics.Shape.AABB as AABB
 import           Arkmonoid.Types
 

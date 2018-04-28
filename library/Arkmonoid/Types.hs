@@ -5,7 +5,6 @@ module Arkmonoid.Types where
 
 import           Data.Ecstasy
 import qualified Graphics.Gloss.Data.Color as G
-import           Linear.V2
 
 import Arkmonoid.Physics.Types
 
@@ -28,5 +27,8 @@ type GameSystem a = System Entity' a
 type GameQueryT m a = QueryT Entity' m a
 
 -- Todo find a better way to expose these globals
+screenWidth :: Int
 screenWidth = 640
+
+screenHeight :: Int
 screenHeight = 480

@@ -31,25 +31,25 @@ import qualified Arkmonoid.Physics.CollisionDetection.ImpendingCollision as Impe
 collisions :: forall id. (Ord id) => Float -> [Boundary] -> [GameObject id] -> GameCollisions id
 collisions delta boundaries objects =
     Map.fromListWith mergeGameCollision $ concat
-      [ fmap withKey $ boundaryCollisions boundaries objects
-      , fmap withKey $ existingCollisions objects
-      , fmap withKey $ impendingCollisions delta objects
+      [ withKey <$> boundaryCollisions boundaries objects
+      , withKey <$> existingCollisions objects
+      , withKey <$> impendingCollisions delta objects
       ]
   where
     withKey :: GameCollision id -> (id, GameCollision id)
-    withKey c @ (GBoundaryCollision id _)  = (id, c)
-    withKey c @ (GExistingCollision id _)  = (id, c)
-    withKey c @ (GImpendingCollision id _) = (id, c)
+    withKey c @ (GBoundaryCollision objId _)  = (objId, c)
+    withKey c @ (GExistingCollision objId _)  = (objId, c)
+    withKey c @ (GImpendingCollision objId _) = (objId, c)
 
     -- | This function asssumes that both game collisions are for the same object
     mergeGameCollision :: GameCollision id -> GameCollision id -> GameCollision id
-    mergeGameCollision (GBoundaryCollision id cs1) (GBoundaryCollision _ cs2)        = GBoundaryCollision id (cs1 ++ cs2)
-    mergeGameCollision (GBoundaryCollision id cs) _                                  = GBoundaryCollision id cs
-    mergeGameCollision _ (GBoundaryCollision id cs)                                  = GBoundaryCollision id cs
-    mergeGameCollision (GExistingCollision id cs1) (GExistingCollision _ cs2)        = GExistingCollision id (cs1 ++ cs2)
-    mergeGameCollision (GExistingCollision id cs) _                                  = GExistingCollision id cs
-    mergeGameCollision _ (GExistingCollision id cs)                                  = GExistingCollision id cs
-    mergeGameCollision (GImpendingCollision id current) (GImpendingCollision _ new)  = GImpendingCollision id (minBy (^.impendingCollision.objectDistance) current new)
+    mergeGameCollision (GBoundaryCollision objId cs1) (GBoundaryCollision _ cs2)        = GBoundaryCollision objId (cs1 ++ cs2)
+    mergeGameCollision (GBoundaryCollision objId cs) _                                  = GBoundaryCollision objId cs
+    mergeGameCollision _ (GBoundaryCollision objId cs)                                  = GBoundaryCollision objId cs
+    mergeGameCollision (GExistingCollision objId cs1) (GExistingCollision _ cs2)        = GExistingCollision objId (cs1 ++ cs2)
+    mergeGameCollision (GExistingCollision objId cs) _                                  = GExistingCollision objId cs
+    mergeGameCollision _ (GExistingCollision objId cs)                                  = GExistingCollision objId cs
+    mergeGameCollision (GImpendingCollision objId current) (GImpendingCollision _ new)  = GImpendingCollision objId (minBy (^.impendingCollision.objectDistance) current new)
 
 boundaryCollisions :: [Boundary] -> [GameObject id] -> [GameCollision id]
 boundaryCollisions boundaries objects = do
@@ -58,17 +58,21 @@ boundaryCollisions boundaries objects = do
   maybeToList $ fmap (\b -> GBoundaryCollision (obj^.identifier) [b]) (BoundaryCollision.gameCollision boundary obj)
 
 existingCollisions :: forall id. [GameObject id] -> [GameCollision id]
-existingCollisions objects = concatMap (uncurry existingCollision) (pairs objects)
-  where existingCollision :: GameObject id -> GameObject id -> [GameCollision id]
-        existingCollision obj1 obj2 = do
+existingCollisions objects = concatMap (uncurry existingGameCollision) (pairs objects)
+  where existingGameCollision :: GameObject id -> GameObject id -> [GameCollision id]
+        existingGameCollision obj1 obj2 = do
           collision <- maybeToList $ ExistingCollision.gameCollision obj1 obj2
-          let flipped = ExistingCollision.gameFlipExisting collision
-          [GExistingCollision (collision^.objectId) [collision], GExistingCollision (flipped^.objectId) [flipped]]
+          let flippedCollision = ExistingCollision.gameFlipExisting collision
+          let gameCollision = GExistingCollision (collision^.objectId) [collision]
+          let flippedGameCollision = GExistingCollision (flippedCollision^.objectId) [flippedCollision]
+          [gameCollision, flippedGameCollision]
 
 impendingCollisions :: forall id. Float -> [GameObject id] -> [GameCollision id]
-impendingCollisions delta objects = concatMap (uncurry impendingCollision) (pairs objects)
-  where impendingCollision :: GameObject id -> GameObject id -> [GameCollision id]
-        impendingCollision obj1 obj2 = do
+impendingCollisions delta objects = concatMap (uncurry impendingGameCollision) (pairs objects)
+  where impendingGameCollision :: GameObject id -> GameObject id -> [GameCollision id]
+        impendingGameCollision obj1 obj2 = do
           collision <- maybeToList $ ImpendingCollision.gameCollision delta obj1 obj2
-          let flipped = ImpendingCollision.gameFlipImpending collision
-          [GImpendingCollision (collision^.objectId) collision, GImpendingCollision (flipped^.objectId) flipped]
+          let flippedCollision = ImpendingCollision.gameFlipImpending collision
+          let gameCollision = GImpendingCollision (collision^.objectId) collision
+          let flippedGameCollision = GImpendingCollision (flippedCollision^.objectId) flippedCollision
+          [gameCollision, flippedGameCollision]
