@@ -3,14 +3,19 @@ module Data.List.ExtendedTest where
 import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
-import           Test.Tasty
 import           Test.Tasty.HUnit
-import           Test.Tasty.Hedgehog
 
 import Data.List.Extended
 
 unit_pairs_smoketest :: IO ()
-unit_pairs_smoketest = assertEqual "for (pairs [1,2,3])" (pairs [1, 2, 3]) [(1,2), (1,3), (2,3)]
+unit_pairs_smoketest =
+  let
+    expected :: [(Int, Int)]
+    expected = [(1,2), (1,3), (2,3)]
+
+    result :: [(Int, Int)]
+    result = pairs [1,2,3]
+  in assertEqual "for (pairs [1,2,3])" expected result
 
 -- | `pairs` gives the combinations of all elements of a list. Therefore the number of pairs
 -- | returned should alwhays be equivalent to the number of possible binary combinations for
