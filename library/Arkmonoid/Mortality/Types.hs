@@ -5,6 +5,7 @@ type Health = Int
 
 data Mortality = Immortal
                | Mortal Health
+               | Dead
                deriving Eq
 
 data Damage = DamageOnCollision Health

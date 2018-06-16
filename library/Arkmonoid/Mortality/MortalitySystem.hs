@@ -12,9 +12,13 @@ import           Arkmonoid.Physics.CollisionDetection.Types
 import qualified Arkmonoid.Physics.CollisionDetection.GameCollisions as GameCollisions
 
 step :: GameCollisions Ent -> GameSystem ()
-step collisions = do
-  damageCollidingEntities collisions
-  killDeadEntities
+step = damageCollidingEntities
+
+-- | Removes dead entities from the entity pool
+finalizeDead :: GameSystem ()
+finalizeDead = void $ emap $ do
+  Dead <- get mortality
+  pure delEntity
 
 damageCollidingEntities :: GameCollisions Ent -> GameSystem ()
 damageCollidingEntities collisions =
@@ -37,9 +41,3 @@ damageCollidingEntities collisions =
       forEnt damagee $ do
         guard (newMortal /= mortal)
         pure $ defEntity' { mortality = Set newMortal }
-
-killDeadEntities :: GameSystem ()
-killDeadEntities = void $ emap $ do
-  (Mortal hp) <- get mortality
-  guard (hp <= 0)
-  pure delEntity

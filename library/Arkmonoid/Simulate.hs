@@ -30,6 +30,7 @@ step delta = do
     linkEntIds
     collisions <- PhysicsSystem.step delta
     MortalitySystem.step collisions
+    MortalitySystem.finalizeDead
   where
     linkEntIds = emapIndexed $ \ent -> do
       without entId
