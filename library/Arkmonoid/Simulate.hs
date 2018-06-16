@@ -14,6 +14,8 @@ import qualified Arkmonoid.Mortality.MortalitySystem as MortalitySystem
 import           Arkmonoid.Physics.Types
 import qualified Arkmonoid.Physics.Shape.AABB as AABB
 import qualified Arkmonoid.Physics.PhysicsSystem as PhysicsSystem
+import           Arkmonoid.Power.Types
+import qualified Arkmonoid.Power.PowerSystem as PowerSystem
 
 initializeWorld :: GameSystem ()
 initializeWorld = do
@@ -30,6 +32,7 @@ step delta = do
     linkEntIds
     collisions <- PhysicsSystem.step delta
     MortalitySystem.step collisions
+    PowerSystem.step
     MortalitySystem.finalizeDead
   where
     linkEntIds = emapIndexed $ \ent -> do
@@ -79,6 +82,7 @@ block blockColor pos = void $ newEntity $ defEntity
 
   , Arkmonoid.Types.color = Just blockColor
   , mortality = Just $ Mortal 1
+  , powerSpawner = Just $ PowerSpawner Widen
   }
 
 blockLine :: G.Color -> V2 Float -> V2 Float -> Int -> GameSystem ()

@@ -19,6 +19,8 @@ library
                        Arkmonoid.Mortality.Mortality
                        Arkmonoid.Mortality.MortalitySystem
                        Arkmonoid.Mortality.Types
+                       Arkmonoid.Power.Types
+                       Arkmonoid.Power.PowerSystem
                        Arkmonoid.Physics.CollisionDetection.BoundaryCollision
                        Arkmonoid.Physics.CollisionDetection.Detection
                        Arkmonoid.Physics.CollisionDetection.ExistingCollision
