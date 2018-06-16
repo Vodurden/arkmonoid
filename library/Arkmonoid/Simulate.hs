@@ -9,10 +9,11 @@ import Control.Monad
 import qualified Graphics.Gloss.Data.Color as G
 
 import           Arkmonoid.Types
+import           Arkmonoid.Mortality.Types
+import qualified Arkmonoid.Mortality.MortalitySystem as MortalitySystem
 import           Arkmonoid.Physics.Types
 import qualified Arkmonoid.Physics.Shape.AABB as AABB
 import qualified Arkmonoid.Physics.PhysicsSystem as PhysicsSystem
-import qualified Arkmonoid.Damage.DamageSystem as DamageSystem
 
 initializeWorld :: GameSystem ()
 initializeWorld = do
@@ -28,7 +29,7 @@ step :: Float -> GameSystem ()
 step delta = do
     linkEntIds
     collisions <- PhysicsSystem.step delta
-    DamageSystem.step collisions
+    MortalitySystem.step collisions
   where
     linkEntIds = emapIndexed $ \ent -> do
       without entId
@@ -62,7 +63,7 @@ ball = void $ newEntity $ defEntity
 
   , Arkmonoid.Types.color = Just G.red
 
-  , damage = Just 1
+  , damage = Just $ DamageOnCollision 1
   }
 
 block :: G.Color -> V2 Float -> GameSystem ()
@@ -76,7 +77,7 @@ block blockColor pos = void $ newEntity $ defEntity
     }
 
   , Arkmonoid.Types.color = Just blockColor
-  , health = Just 1
+  , mortality = Just $ Mortal 1
   }
 
 blockLine :: G.Color -> V2 Float -> V2 Float -> Int -> GameSystem ()

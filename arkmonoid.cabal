@@ -15,8 +15,10 @@ cabal-version:       >=1.10
 library
   build-depends:       base >=4.9 && <4.11, ecstasy, linear, gloss, transformers, containers, lens
   exposed-modules:     Arkmonoid
-                       Arkmonoid.Damage.DamageSystem
                        Arkmonoid.Input
+                       Arkmonoid.Mortality.Mortality
+                       Arkmonoid.Mortality.MortalitySystem
+                       Arkmonoid.Mortality.Types
                        Arkmonoid.Physics.CollisionDetection.BoundaryCollision
                        Arkmonoid.Physics.CollisionDetection.Detection
                        Arkmonoid.Physics.CollisionDetection.ExistingCollision
