@@ -64,8 +64,9 @@ test-suite test
   type: exitcode-stdio-1.0
   main-is: Driver.hs
   build-depends: base >=4.9 && <4.11, arkmonoid, tasty, tasty-discover,
-                 tasty-hunit, HUnit, tasty-hedgehog, hedgehog
+                 tasty-hunit, HUnit, tasty-hedgehog, hedgehog, linear
   other-modules: Data.List.ExtendedTest
+                 Arkmonoid.Physics.Shape.AABBTest
   hs-source-dirs: test
   ghc-options:
     -Wall

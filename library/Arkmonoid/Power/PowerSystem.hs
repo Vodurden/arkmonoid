@@ -1,3 +1,5 @@
+{-# LANGUAGE DataKinds    #-}
+
 module Arkmonoid.Power.PowerSystem where
 
 import           Control.Monad
@@ -13,9 +15,48 @@ import           Arkmonoid.Power.Types
 import           Arkmonoid.Physics.Types
 import           Arkmonoid.Physics.Shape.Types
 import qualified Arkmonoid.Physics.Shape.AABB as AABB
+import           Arkmonoid.Physics.CollisionDetection.Types
+import qualified Arkmonoid.Physics.CollisionDetection.GameCollisions as GameCollisions
 
-step :: GameSystem ()
-step = spawnPowers
+step :: GameCollisions Ent -> GameSystem ()
+step collisions = do
+  applyPowers collisions
+  spawnPowers
+
+applyPowers :: GameCollisions Ent -> GameSystem ()
+applyPowers collisions =
+    let collidingEnts = GameCollisions.collidingIds collisions
+    in traverse_ (uncurry applyPowerFromTo) collidingEnts
+
+applyPowerFromTo :: Ent -> Ent -> GameSystem ()
+applyPowerFromTo powerer poweree = do
+  maybePowerApplication <- eget powerer (get powerApplier)
+  canReceive <- eget poweree (get powerReceiver)
+
+  case (maybePowerApplication, canReceive) of
+    (Just powerApplication, Just ()) -> do
+      forEnt poweree $ applyPowerTo powerApplication
+      forEnt powerer $ pure $ defEntity' { mortality = Set Dead }
+    (Nothing, _) -> pure ()
+    (_, Nothing) -> pure ()
+
+applyPowerTo :: (Monad m)
+             => PowerApplier
+             -> GameQueryT m (Entity' 'SetterOf)
+applyPowerTo applier = do
+    with powerReceiver
+    case applier of
+      (PowerApplier Widen) -> applySizeChange 1.1
+      (PowerApplier Shorten) -> applySizeChange 0.9
+  where
+    applySizeChange :: (Monad m)
+                    => Float
+                    -> GameQueryT m (Entity' 'SetterOf)
+    applySizeChange percentage = do
+      physics <- get physicalObject
+      let change = AABB.clampWidth 50 200 . AABB.scaleWidth percentage
+      let newShape = over shape change physics
+      pure $ defEntity' { physicalObject = Set newShape }
 
 spawnPowers :: GameSystem ()
 spawnPowers = do
@@ -29,9 +70,9 @@ spawnPowers = do
     traverse_ (uncurry spawnPower) powerInfos
   where
     spawnPower :: Point -> Power -> GameSystem ()
-    spawnPower point power = void $ newEntity $ defEntity
+    spawnPower pos power = void $ newEntity $ defEntity
       { powerApplier = Just (PowerApplier power)
-      , physicalObject = Just $ powerUpPhysics point
+      , physicalObject = Just $ powerUpPhysics pos
       , Arkmonoid.Types.color = Just G.blue
       }
 

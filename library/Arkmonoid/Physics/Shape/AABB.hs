@@ -53,6 +53,35 @@ bottomLeft shape = shape^.minPoint
 bottomRight :: AABB -> Point
 bottomRight shape = V2 (right shape) (bottom shape)
 
+-- | Scales the width of the shape by the given percentage
+scaleWidth :: Float -> AABB -> AABB
+scaleWidth percentage aabb =
+  let currentWidth = (size aabb)^._x
+      newWidth = currentWidth * percentage
+  in resizeWidth newWidth aabb
+
+-- | Caps the width of the AABB to be between the given
+-- | min and max widths
+clampWidth :: Float -> Float -> AABB -> AABB
+clampWidth minWidth maxWidth aabb =
+  let currentWidth = (size aabb)^._x
+      clamped = clamp minWidth maxWidth currentWidth
+  in resizeWidth clamped aabb
+
+-- | Sets the size of the AABB to the given size
+resize :: Size -> AABB -> AABB
+resize newSize aabb =
+  let difference = newSize - size aabb
+      halfDifference = difference / 2.0
+  in over minPoint (+ negate halfDifference)
+     . over maxPoint (+ halfDifference)
+     $ aabb
+
+resizeWidth :: Float -> AABB -> AABB
+resizeWidth width aabb =
+  let currentHeight = (size aabb)^._y
+  in resize (V2 width currentHeight) aabb
+
 -- | Returns a list of lines that make up this AABB
 segments :: AABB -> [Segment]
 segments a =

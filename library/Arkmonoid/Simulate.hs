@@ -32,7 +32,7 @@ step delta = do
     linkEntIds
     collisions <- PhysicsSystem.step delta
     MortalitySystem.step collisions
-    PowerSystem.step
+    PowerSystem.step collisions
     MortalitySystem.finalizeDead
   where
     linkEntIds = emapIndexed $ \ent -> do
@@ -53,6 +53,8 @@ paddle = void $ newEntity $ defEntity
   , Arkmonoid.Types.color = Just G.red
 
   , followMouse = Just (FollowMouse True False)
+
+  , powerReceiver = Just ()
   }
 
 ball :: GameSystem ()
@@ -82,7 +84,7 @@ block blockColor pos = void $ newEntity $ defEntity
 
   , Arkmonoid.Types.color = Just blockColor
   , mortality = Just $ Mortal 1
-  , powerSpawner = Just $ PowerSpawner Widen
+  , powerSpawner = Just $ PowerSpawner Shorten
   }
 
 blockLine :: G.Color -> V2 Float -> V2 Float -> Int -> GameSystem ()

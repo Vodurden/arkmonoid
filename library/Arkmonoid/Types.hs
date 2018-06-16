@@ -22,6 +22,7 @@ data Entity' f = Entity
 
   , powerApplier    :: Component f 'Field PowerApplier
   , powerSpawner    :: Component f 'Field PowerSpawner
+  , powerReceiver   :: Component f 'Field ()
 
   , color           :: Component f 'Field G.Color
   , followMouse     :: Component f 'Field FollowMouse
