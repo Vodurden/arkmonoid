@@ -26,17 +26,17 @@ render = do
 
 renderGame :: GameSystem Picture
 renderGame = do
-    pics <- (efor . const) entPicture
+    pics <- efor allEnts entPicture
     pure $ Pictures pics
 
 entPicture :: (Monad m) => GameQueryT m G.Picture
 entPicture = do
-  obj <- get physicalObject
+  obj <- query physicalObject
   let physicsShape = obj^.shape
   let (V2 x y) = AABB.center physicsShape
   let (V2 w h) = AABB.size physicsShape
 
-  col <- getMaybe Arkmonoid.Types.color
+  col <- queryMaybe Arkmonoid.Types.color
   let colorFn = maybe id G.Color col
 
   pure $ colorFn $ G.Translate x y $ rectangleSolid w h

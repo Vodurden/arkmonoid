@@ -30,7 +30,6 @@ data Entity' f = Entity
   }
   deriving (Generic)
 
-type World = (Int, Entity' 'WorldOf)
 type GameSystem a = System Entity' a
 
 type GameQueryT m a = QueryT Entity' m a

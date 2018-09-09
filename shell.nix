@@ -1,24 +1,53 @@
-{ nixpkgs ? import <nixos-unstable> {}, compiler ? "ghc822", doBenchmark ? false }:
+{ compiler ? "ghc822", doBenchmark ? false }:
 
 let
-  pkgs = nixpkgs;
+  pinnedVersion = builtins.fromJSON (builtins.readFile ./nixpkgs-version.json);
+  nixpkgs = builtins.fetchTarball {
+    url = "https://github.com/nixos/nixpkgs-channels/archive/${pinnedVersion.rev}.tar.gz";
+    sha256 = pinnedVersion.sha256;
+  };
+  pkgs = import nixpkgs {
+    config = {
+      packageOverrides = oldPkgs: {
+        glibc = pkgsUnstable.glibc;
+      };
+    };
+  };
 
-  f = import ./default.nix;
-
-  haskellPackages = pkgs.haskell.packages.${compiler}.override {
+  haskellPackagesStable = pkgs.haskell.packages.${compiler}.override {
     overrides = haskellNew: haskellOld: rec {
-      # We want to enable profiling for all our dependencies in nix-shell
-      # so we can profile stuff!
       mkDerivation = args: haskellOld.mkDerivation (args // {
         enableLibraryProfiling = true;
       });
+    };
+  };
 
-      # OpenGLRaw segfaults when we try to build it's haddocks
-      OpenGLRaw = pkgs.haskell.lib.dontHaddock haskellOld.OpenGLRaw;
+  # We want to be able to pull some packages from _the future_!
+  unstablePinnedVersion = builtins.fromJSON (builtins.readFile ./nixpkgs-unstable-version.json);
+  nixpkgsUnstable = builtins.fetchTarball {
+    url = "https://github.com/nixos/nixpkgs-channels/archive/${unstablePinnedVersion.rev}.tar.gz";
+    sha256 = unstablePinnedVersion.sha256;
+  };
+  pkgsUnstable = import nixpkgsUnstable {};
+
+  f = import ./default.nix;
+
+  # We're using pkgsUnstable as it has ecstasy 2.0. We can replace this with nixos-18.09 when
+  # it releases.
+  haskellPackages = pkgsUnstable.haskell.packages.${compiler}.override {
+    overrides = haskellNew: haskellOld: rec {
+      # OpenGL segfaults when we try to haddock it. It also fails to link when we use
+      # a version of OpenGL from a nixpkgs later then our NixOS install. It seems to be unable
+      # to find certain OpenGL symbols.
+      #
+      # To work around this we use the stable versions of the OpenGL libraries.
+      GLUT = pkgs.haskell.lib.dontHaddock haskellPackagesStable.GLUT;
+      OpenGL = pkgs.haskell.lib.dontHaddock haskellPackagesStable.OpenGL;
+      OpenGLRaw = pkgs.haskell.lib.dontHaddock haskellPackagesStable.OpenGLRaw;
 
       # these tests take _forever_
-      linear = pkgs.haskell.lib.dontCheck haskellOld.linear;
-      happy = pkgs.haskell.lib.dontCheck haskellOld.happy;
+      linear = pkgsUnstable.haskell.lib.dontCheck haskellOld.linear;
+      happy = pkgsUnstable.haskell.lib.dontCheck haskellOld.happy;
     };
   };
 

@@ -90,5 +90,9 @@ executable arkmonoid
     -fprof-auto
     -rtsopts
     -funfolding-use-threshold=16
-    "-with-rtsopts=-N -p -hc -i0.1"
+
+    -- Something in the dependency tree is missing profiling
+    -- which is breaking this flag. Restore it once we figure out
+    -- what it is
+    -- "-with-rtsopts=-N -p -hc -i0.1"
   default-language:    Haskell2010

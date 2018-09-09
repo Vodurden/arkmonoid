@@ -30,13 +30,13 @@ applyPowers collisions =
 
 applyPowerFromTo :: Ent -> Ent -> GameSystem ()
 applyPowerFromTo powerer poweree = do
-  maybePowerApplication <- eget powerer (get powerApplier)
-  canReceive <- eget poweree (get powerReceiver)
+  maybePowerApplication <- eget powerer (query powerApplier)
+  canReceive <- eget poweree (query powerReceiver)
 
   case (maybePowerApplication, canReceive) of
     (Just powerApplication, Just ()) -> do
       forEnt poweree $ applyPowerTo powerApplication
-      forEnt powerer $ pure $ defEntity' { mortality = Set Dead }
+      forEnt powerer $ pure $ unchanged { mortality = Set Dead }
     (Nothing, _) -> pure ()
     (_, Nothing) -> pure ()
 
@@ -53,24 +53,24 @@ applyPowerTo applier = do
                     => Float
                     -> GameQueryT m (Entity' 'SetterOf)
     applySizeChange percentage = do
-      physics <- get physicalObject
+      physics <- query physicalObject
       let change = AABB.clampWidth 50 200 . AABB.scaleWidth percentage
       let newShape = over shape change physics
-      pure $ defEntity' { physicalObject = Set newShape }
+      pure $ unchanged { physicalObject = Set newShape }
 
 spawnPowers :: GameSystem ()
 spawnPowers = do
-    powerInfos <- (efor . const) $ do
-      Dead <- get mortality
-      (PowerSpawner power) <- get powerSpawner
-      physics <- get physicalObject
+    powerInfos <- efor allEnts $ do
+      Dead <- query mortality
+      (PowerSpawner power) <- query powerSpawner
+      physics <- query physicalObject
 
       pure (AABB.center $ physics^.shape, power)
 
     traverse_ (uncurry spawnPower) powerInfos
   where
     spawnPower :: Point -> Power -> GameSystem ()
-    spawnPower pos power = void $ newEntity $ defEntity
+    spawnPower pos power = void $ createEntity $ newEntity
       { powerApplier = Just (PowerApplier power)
       , physicalObject = Just $ powerUpPhysics pos
       , Arkmonoid.Types.color = Just G.blue

@@ -70,11 +70,13 @@ step delta = do
 
 collisionObjects :: GameSystem [GameObject Ent]
 collisionObjects = do
-    efor $ \ent -> entCollisionObject ent
+    efor allEnts $ do
+      ent <- queryEnt
+      entCollisionObject ent
   where
     entCollisionObject :: (Monad m) => Ent -> GameQueryT m (GameObject Ent)
     entCollisionObject ent = do
-      physObject <- get physicalObject
+      physObject <- query physicalObject
       pure $ GameObject ent physObject
 
 updateEntities :: [GameObject Ent] -> GameSystem ()
@@ -82,10 +84,10 @@ updateEntities = traverse_ updateEntity
   where updateEntity :: GameObject Ent -> GameSystem ()
         updateEntity obj = forEnt (obj^.identifier) $ do
           -- Don't update if nothing has changed
-          currentPhysicalObj <- get physicalObject
+          currentPhysicalObj <- query physicalObject
           let newPhysicalObject = obj^.physical
           guard (currentPhysicalObj /= newPhysicalObject)
 
-          pure $ defEntity'
+          pure $ unchanged
             { physicalObject = Set $ obj^.physical
             }

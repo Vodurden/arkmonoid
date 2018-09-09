@@ -18,20 +18,20 @@ handleInput event =
 
 unfreezeOnLeftClick :: Event -> GameSystem ()
 unfreezeOnLeftClick (EventKey (MouseButton LeftButton) _ _ _) =
-  emap $ do
-    phys <- get physicalObject
+  emap allEnts $ do
+    phys <- query physicalObject
 
     -- Don't update if we're already unfrozen.
     guard (phys^.frozen /= False)
 
-    pure defEntity' { physicalObject = Set (set frozen False phys) }
+    pure unchanged { physicalObject = Set (set frozen False phys) }
 unfreezeOnLeftClick _ = pure ()
 
 handleFollowMouse :: Event -> GameSystem ()
 handleFollowMouse (EventMotion (xPos, yPos)) =
-  emap $ do
-    (FollowMouse followX followY) <- get followMouse
-    phys <- get physicalObject
+  emap allEnts $ do
+    (FollowMouse followX followY) <- query followMouse
+    phys <- query physicalObject
     let (V2 x y) = AABB.center (phys^.shape)
     let impulseX = if followX then xPos - x else 0
     let impulseY = if followY then yPos - y else 0
@@ -40,6 +40,6 @@ handleFollowMouse (EventMotion (xPos, yPos)) =
     guard (not $ nearZero newImpulse)
 
     let newPhysicalObject = phys & impulse .~ newImpulse
-    pure $ defEntity'
+    pure $ unchanged
       { physicalObject = Set newPhysicalObject }
 handleFollowMouse _ = pure ()

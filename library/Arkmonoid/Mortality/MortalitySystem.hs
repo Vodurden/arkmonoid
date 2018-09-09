@@ -16,8 +16,8 @@ step = damageCollidingEntities
 
 -- | Removes dead entities from the entity pool
 finalizeDead :: GameSystem ()
-finalizeDead = void $ emap $ do
-  Dead <- get mortality
+finalizeDead = void $ emap allEnts $ do
+  Dead <- query mortality
   pure delEntity
 
 damageCollidingEntities :: GameCollisions Ent -> GameSystem ()
@@ -29,15 +29,15 @@ damageCollidingEntities collisions =
     damageFromTo :: Ent -> Ent -> GameSystem ()
     damageFromTo damager damagee = do
       -- Entities are Harmless by default
-      maybeDamage <- eget damager (get damage)
+      maybeDamage <- eget damager (query damage)
       let dmg = fromMaybe Harmless maybeDamage
 
       -- Entities are Immortal by default
-      maybeMortal <- eget damagee (get mortality)
+      maybeMortal <- eget damagee (query mortality)
       let mortal = fromMaybe Immortal maybeMortal
 
       let newMortal = Mortality.damage dmg mortal
 
       forEnt damagee $ do
         guard (newMortal /= mortal)
-        pure $ defEntity' { mortality = Set newMortal }
+        pure $ unchanged { mortality = Set newMortal }

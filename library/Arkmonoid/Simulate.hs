@@ -35,13 +35,13 @@ step delta = do
     PowerSystem.step collisions
     MortalitySystem.finalizeDead
   where
-    linkEntIds = emapIndexed $ \ent -> do
-      without entId
-      pure defEntity' { entId = Set ent }
+    linkEntIds = emap allEnts $ do
+      eId <- queryEnt
+      pure unchanged { entId = Set eId }
 
 -- TODO: An actual level system.
 paddle :: GameSystem ()
-paddle = void $ newEntity $ defEntity
+paddle = void $ createEntity $ newEntity
   { physicalObject = Just PhysicalObject
     { _velocity = V2 0 0
     , _impulse  = V2 0 0
@@ -58,7 +58,7 @@ paddle = void $ newEntity $ defEntity
   }
 
 ball :: GameSystem ()
-ball = void $ newEntity $ defEntity
+ball = void $ createEntity $ newEntity
   { physicalObject = Just PhysicalObject
     { _velocity = V2 250 (250)
     , _impulse = V2 0 0
@@ -73,7 +73,7 @@ ball = void $ newEntity $ defEntity
   }
 
 block :: G.Color -> V2 Float -> GameSystem ()
-block blockColor pos = void $ newEntity $ defEntity
+block blockColor pos = void $ createEntity $ newEntity
   { physicalObject = Just PhysicalObject
     { _velocity = V2 0 0
     , _impulse = V2 0 0
