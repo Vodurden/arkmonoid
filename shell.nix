@@ -46,7 +46,10 @@ let
       OpenGLRaw = pkgs.haskell.lib.dontHaddock haskellPackagesStable.OpenGLRaw;
 
       # these tests take _forever_
-      linear = pkgsUnstable.haskell.lib.dontCheck haskellOld.linear;
+      kan-extensions = haskellPackagesStable.kan-extensions;
+      lens = haskellPackagesStable.lens;
+      linear = pkgsUnstable.haskell.lib.dontCheck haskellPackagesStable.linear;
+      gloss = pkgsUnstable.haskell.lib.dontCheck haskellPackagesStable.gloss;
       happy = pkgsUnstable.haskell.lib.dontCheck haskellOld.happy;
     };
   };
