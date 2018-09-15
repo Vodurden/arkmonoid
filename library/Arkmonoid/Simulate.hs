@@ -2,7 +2,7 @@
 
 module Arkmonoid.Simulate (initializeWorld, step) where
 
-import Data.Ecstasy.Extended
+import Data.Ecstasy
 import Data.Foldable
 import Linear.V2
 import Control.Monad

@@ -4,7 +4,7 @@ module Arkmonoid.Power.PowerSystem where
 
 import           Control.Monad
 import           Control.Lens
-import           Data.Ecstasy.Extended
+import           Data.Ecstasy
 import           Data.Foldable
 import qualified Graphics.Gloss.Data.Color as G
 import           Linear.V2
@@ -30,13 +30,13 @@ applyPowers collisions =
 
 applyPowerFromTo :: Ent -> Ent -> GameSystem ()
 applyPowerFromTo powerer poweree = do
-  maybePowerApplication <- eget powerer (query powerApplier)
-  canReceive <- eget poweree (query powerReceiver)
+  maybePowerApplication <- runQueryT powerer (query powerApplier)
+  canReceive <- runQueryT poweree (query powerReceiver)
 
   case (maybePowerApplication, canReceive) of
     (Just powerApplication, Just ()) -> do
-      forEnt poweree $ applyPowerTo powerApplication
-      forEnt powerer $ pure $ unchanged { mortality = Set Dead }
+      emap (anEnt poweree) $ applyPowerTo powerApplication
+      emap (anEnt powerer) $ pure $ unchanged { mortality = Set Dead }
     (Nothing, _) -> pure ()
     (_, Nothing) -> pure ()
 
@@ -61,7 +61,8 @@ applyPowerTo applier = do
 spawnPowers :: GameSystem ()
 spawnPowers = do
     powerInfos <- efor allEnts $ do
-      Dead <- query mortality
+      m <- query mortality
+      guard (m == Dead)
       (PowerSpawner power) <- query powerSpawner
       physics <- query physicalObject
 

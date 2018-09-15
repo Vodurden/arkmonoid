@@ -42,7 +42,6 @@ library
                        Arkmonoid.Render
                        Arkmonoid.Simulate
                        Arkmonoid.Types
-                       Data.Ecstasy.Extended
                        Data.List.Extended
                        Data.Maybe.Extended
                        Data.Ord.Extended

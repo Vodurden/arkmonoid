@@ -33,7 +33,7 @@ module Arkmonoid.Physics.PhysicsSystem where
 
 import Control.Monad (guard)
 import Control.Lens
-import Data.Ecstasy.Extended
+import Data.Ecstasy
 import Data.Foldable
 import Data.Map (Map)
 import Linear.V2
@@ -82,7 +82,7 @@ collisionObjects = do
 updateEntities :: [GameObject Ent] -> GameSystem ()
 updateEntities = traverse_ updateEntity
   where updateEntity :: GameObject Ent -> GameSystem ()
-        updateEntity obj = forEnt (obj^.identifier) $ do
+        updateEntity obj = emap (anEnt (obj^.identifier)) $ do
           -- Don't update if nothing has changed
           currentPhysicalObj <- query physicalObject
           let newPhysicalObject = obj^.physical

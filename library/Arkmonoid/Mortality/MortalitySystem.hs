@@ -1,7 +1,7 @@
 module Arkmonoid.Mortality.MortalitySystem where
 
 import Control.Monad
-import Data.Ecstasy.Extended
+import Data.Ecstasy
 import Data.Foldable
 import Data.Maybe
 
@@ -17,7 +17,8 @@ step = damageCollidingEntities
 -- | Removes dead entities from the entity pool
 finalizeDead :: GameSystem ()
 finalizeDead = void $ emap allEnts $ do
-  Dead <- query mortality
+  m <- query mortality
+  guard (m == Dead)
   pure delEntity
 
 damageCollidingEntities :: GameCollisions Ent -> GameSystem ()
@@ -29,15 +30,11 @@ damageCollidingEntities collisions =
     damageFromTo :: Ent -> Ent -> GameSystem ()
     damageFromTo damager damagee = do
       -- Entities are Harmless by default
-      maybeDamage <- eget damager (query damage)
+      maybeDamage <- runQueryT damager (query damage)
       let dmg = fromMaybe Harmless maybeDamage
 
-      -- Entities are Immortal by default
-      maybeMortal <- eget damagee (query mortality)
-      let mortal = fromMaybe Immortal maybeMortal
-
-      let newMortal = Mortality.damage dmg mortal
-
-      forEnt damagee $ do
-        guard (newMortal /= mortal)
+      emap (anEnt damagee) $ do
+        -- Entities are Immortal by default
+        mortal <- queryDef Immortal mortality
+        let newMortal = Mortality.damage dmg mortal
         pure $ unchanged { mortality = Set newMortal }
