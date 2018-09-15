@@ -29,15 +29,10 @@ initializeWorld = do
 
 step :: Float -> GameSystem ()
 step delta = do
-    linkEntIds
     collisions <- PhysicsSystem.step delta
     MortalitySystem.step collisions
     PowerSystem.step collisions
     MortalitySystem.finalizeDead
-  where
-    linkEntIds = emap allEnts $ do
-      eId <- queryEnt
-      pure unchanged { entId = Set eId }
 
 -- TODO: An actual level system.
 paddle :: GameSystem ()

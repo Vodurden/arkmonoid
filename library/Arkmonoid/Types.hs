@@ -13,9 +13,7 @@ import Arkmonoid.Mortality.Types
 data FollowMouse = FollowMouse Bool Bool -- Follow mouse on the X-axis/Y-axis/both
 
 data Entity' f = Entity
-  { entId           :: Component f 'Field Ent
-
-  , physicalObject  :: Component f 'Field PhysicalObject
+  { physicalObject  :: Component f 'Field PhysicalObject
 
   , mortality       :: Component f 'Field Mortality
   , damage          :: Component f 'Field Damage
