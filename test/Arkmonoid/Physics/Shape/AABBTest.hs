@@ -1,6 +1,5 @@
 module Arkmonoid.Physics.Shape.AABBTest where
 
-import           Test.Tasty
 import           Test.Tasty.HUnit
 import           Linear.V2
 

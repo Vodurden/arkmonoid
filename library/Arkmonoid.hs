@@ -1,6 +1,5 @@
 module Arkmonoid (main) where
 
-import qualified Control.Monad.Trans.State as S
 import           Data.Ecstasy
 import           Data.Functor.Identity (runIdentity)
 import           Graphics.Gloss.Interface.Pure.Game
