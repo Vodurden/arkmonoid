@@ -11,12 +11,12 @@ import Graphics.Gloss.Interface.Pure.Game
 import Linear.V2
 import Linear.Epsilon (nearZero)
 
-handleInput :: Event -> GameSystem ()
+handleInput :: (Monad m) => Event -> GameSystemT m ()
 handleInput event =
   unfreezeOnLeftClick event >>
   handleFollowMouse event
 
-unfreezeOnLeftClick :: Event -> GameSystem ()
+unfreezeOnLeftClick :: (Monad m) => Event -> GameSystemT m ()
 unfreezeOnLeftClick (EventKey (MouseButton LeftButton) _ _ _) =
   emap allEnts $ do
     phys <- query physicalObject
@@ -27,7 +27,7 @@ unfreezeOnLeftClick (EventKey (MouseButton LeftButton) _ _ _) =
     pure unchanged { physicalObject = Set (set frozen False phys) }
 unfreezeOnLeftClick _ = pure ()
 
-handleFollowMouse :: Event -> GameSystem ()
+handleFollowMouse :: (Monad m) => Event -> GameSystemT m ()
 handleFollowMouse (EventMotion (xPos, yPos)) =
   emap allEnts $ do
     (FollowMouse followX followY) <- query followMouse

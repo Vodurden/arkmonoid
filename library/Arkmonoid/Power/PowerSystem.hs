@@ -3,6 +3,7 @@
 module Arkmonoid.Power.PowerSystem where
 
 import           Control.Monad
+import           Control.Monad.Random
 import           Control.Lens
 import           Data.Ecstasy
 import           Data.Foldable
@@ -18,17 +19,17 @@ import qualified Arkmonoid.Physics.Shape.AABB as AABB
 import           Arkmonoid.Physics.CollisionDetection.Types
 import qualified Arkmonoid.Physics.CollisionDetection.GameCollisions as GameCollisions
 
-step :: GameCollisions Ent -> GameSystem ()
+step :: (MonadRandom m) => GameCollisions Ent -> GameSystemT m ()
 step collisions = do
   applyPowers collisions
   spawnPowers
 
-applyPowers :: GameCollisions Ent -> GameSystem ()
+applyPowers :: (Monad m) => GameCollisions Ent -> GameSystemT m ()
 applyPowers collisions =
     let collidingEnts = GameCollisions.collidingIds collisions
     in traverse_ (uncurry applyPowerFromTo) collidingEnts
 
-applyPowerFromTo :: Ent -> Ent -> GameSystem ()
+applyPowerFromTo :: (Monad m) => Ent -> Ent -> GameSystemT m ()
 applyPowerFromTo powerer poweree = do
   maybePowerApplication <- runQueryT powerer (query powerApplier)
   canReceive <- runQueryT poweree (query powerReceiver)
@@ -58,9 +59,12 @@ applyPowerTo applier = do
       let newShape = over shape change physics
       pure $ unchanged { physicalObject = Set newShape }
 
-spawnPowers :: GameSystem ()
+spawnPowers :: (MonadRandom m) => GameSystemT m ()
 spawnPowers = do
     powerInfos <- efor allEnts $ do
+      shouldSpawnPower <- lift $ spawnPowerChance
+      guard shouldSpawnPower
+
       m <- query mortality
       guard (m == Dead)
       (PowerSpawner power) <- query powerSpawner
@@ -70,7 +74,7 @@ spawnPowers = do
 
     traverse_ (uncurry spawnPower) powerInfos
   where
-    spawnPower :: Point -> Power -> GameSystem ()
+    spawnPower :: (MonadRandom m) => Point -> Power -> GameSystemT m ()
     spawnPower pos power = void $ createEntity $ newEntity
       { powerApplier = Just (PowerApplier power)
       , physicalObject = Just $ powerUpPhysics pos
@@ -85,3 +89,6 @@ spawnPowers = do
       , _material = Solid
       , _frozen = False
       }
+
+spawnPowerChance :: (MonadRandom m) => m Bool
+spawnPowerChance = getRandom

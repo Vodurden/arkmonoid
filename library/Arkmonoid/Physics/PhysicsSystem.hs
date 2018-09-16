@@ -45,7 +45,7 @@ import qualified Arkmonoid.Physics.Simulation as Simulation
 import           Arkmonoid.Physics.Types
 import           Arkmonoid.Types
 
-step :: Float -> GameSystem (Map Ent (GameCollision Ent))
+step :: (Monad m) => Float -> GameSystemT m (Map Ent (GameCollision Ent))
 step delta = do
     objects <- collisionObjects
     let collisions = CollisionDetection.collisions delta boundaries objects
@@ -68,7 +68,7 @@ step delta = do
         bottomLeftCorner  = V2 (-halfScreenWidth) (-halfScreenHeight)
         bottomRightCorner = V2 (halfScreenWidth) (-halfScreenHeight)
 
-collisionObjects :: GameSystem [GameObject Ent]
+collisionObjects :: (Monad m) => GameSystemT m [GameObject Ent]
 collisionObjects = do
     efor allEnts $ do
       ent <- queryEnt
@@ -79,9 +79,9 @@ collisionObjects = do
       physObject <- query physicalObject
       pure $ GameObject ent physObject
 
-updateEntities :: [GameObject Ent] -> GameSystem ()
+updateEntities :: (Monad m) => [GameObject Ent] -> GameSystemT m ()
 updateEntities = traverse_ updateEntity
-  where updateEntity :: GameObject Ent -> GameSystem ()
+  where updateEntity :: (Monad m) => GameObject Ent -> GameSystemT m ()
         updateEntity obj = emap (anEnt (obj^.identifier)) $ do
           -- Don't update if nothing has changed
           currentPhysicalObj <- query physicalObject

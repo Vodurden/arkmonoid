@@ -18,13 +18,13 @@ display = InWindow "arkmonoid" (fromIntegral screenWidth, fromIntegral screenHei
 backgroundColor :: G.Color
 backgroundColor = G.black
 
-render :: GameSystem Picture
+render :: (Monad m) => GameSystemT m Picture
 render = do
   gamePicture <- renderGame
 
   pure $ Pictures [gamePicture]
 
-renderGame :: GameSystem Picture
+renderGame :: (Monad m) => GameSystemT m Picture
 renderGame = do
     pics <- efor allEnts entPicture
     pure $ Pictures pics

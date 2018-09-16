@@ -1,8 +1,10 @@
 {-# LANGUAGE DataKinds     #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Arkmonoid.Types where
 
+import           Control.Monad.Random
 import           Data.Ecstasy
 import qualified Graphics.Gloss.Data.Color as G
 
@@ -28,9 +30,19 @@ data Entity' f = Entity
   }
   deriving (Generic)
 
-type GameSystem a = System Entity' a
+data GameState = GameState
+  { _gameState :: GameSystemState Underlying
+  , _random :: StdGen
+  }
 
+type GameSystemState m = SystemState Entity' m
+
+type GameSystemT m a = SystemT Entity' m a
 type GameQueryT m a = QueryT Entity' m a
+
+type Underlying = (RandT StdGen IO)
+newtype Arkmonad a = Arkmonad { runArkmonad :: (GameSystemT Underlying a) }
+  deriving (Functor, Applicative, Monad, MonadIO)
 
 -- Todo find a better way to expose these globals
 screenWidth :: Int

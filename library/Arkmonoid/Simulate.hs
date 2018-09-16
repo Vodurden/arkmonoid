@@ -6,6 +6,7 @@ import Data.Ecstasy
 import Data.Foldable
 import Linear.V2
 import Control.Monad
+import Control.Monad.Random
 import qualified Graphics.Gloss.Data.Color as G
 
 import           Arkmonoid.Types
@@ -17,7 +18,7 @@ import qualified Arkmonoid.Physics.PhysicsSystem as PhysicsSystem
 import           Arkmonoid.Power.Types
 import qualified Arkmonoid.Power.PowerSystem as PowerSystem
 
-initializeWorld :: GameSystem ()
+initializeWorld :: (Monad m) => GameSystemT m ()
 initializeWorld = do
   ball
   paddle
@@ -27,7 +28,7 @@ initializeWorld = do
   blockLine G.green  (V2 (-290) 170) (V2 290 170) 10
   blockLine G.blue   (V2 (-290) 150) (V2 290 150) 10
 
-step :: Float -> GameSystem ()
+step :: (MonadRandom m) => Float -> GameSystemT m ()
 step delta = do
     collisions <- PhysicsSystem.step delta
     MortalitySystem.step collisions
@@ -35,7 +36,7 @@ step delta = do
     MortalitySystem.finalizeDead
 
 -- TODO: An actual level system.
-paddle :: GameSystem ()
+paddle :: (Monad m) => GameSystemT m ()
 paddle = void $ createEntity $ newEntity
   { physicalObject = Just PhysicalObject
     { _velocity = V2 0 0
@@ -52,7 +53,7 @@ paddle = void $ createEntity $ newEntity
   , powerReceiver = Just ()
   }
 
-ball :: GameSystem ()
+ball :: (Monad m) => GameSystemT m ()
 ball = void $ createEntity $ newEntity
   { physicalObject = Just PhysicalObject
     { _velocity = V2 250 (250)
@@ -67,7 +68,7 @@ ball = void $ createEntity $ newEntity
   , damage = Just $ DamageOnCollision 1
   }
 
-block :: G.Color -> V2 Float -> GameSystem ()
+block :: (Monad m) => G.Color -> V2 Float -> GameSystemT m ()
 block blockColor pos = void $ createEntity $ newEntity
   { physicalObject = Just PhysicalObject
     { _velocity = V2 0 0
@@ -82,7 +83,7 @@ block blockColor pos = void $ createEntity $ newEntity
   , powerSpawner = Just $ PowerSpawner Shorten
   }
 
-blockLine :: G.Color -> V2 Float -> V2 Float -> Int -> GameSystem ()
+blockLine :: (Monad m) => G.Color -> V2 Float -> V2 Float -> Int -> GameSystemT m ()
 blockLine blockColor start end blocks = traverse_ (block blockColor) positions
   where
     scale = (abs $ end - start) / (fromIntegral blocks)

@@ -11,23 +11,23 @@ import qualified Arkmonoid.Mortality.Mortality as Mortality
 import           Arkmonoid.Physics.CollisionDetection.Types
 import qualified Arkmonoid.Physics.CollisionDetection.GameCollisions as GameCollisions
 
-step :: GameCollisions Ent -> GameSystem ()
+step :: (Monad m) => GameCollisions Ent -> GameSystemT m ()
 step = damageCollidingEntities
 
 -- | Removes dead entities from the entity pool
-finalizeDead :: GameSystem ()
+finalizeDead :: (Monad m) => GameSystemT m ()
 finalizeDead = void $ emap allEnts $ do
   m <- query mortality
   guard (m == Dead)
   pure delEntity
 
-damageCollidingEntities :: GameCollisions Ent -> GameSystem ()
+damageCollidingEntities :: (Monad m) => GameCollisions Ent -> GameSystemT m ()
 damageCollidingEntities collisions =
     let collidingEnts = GameCollisions.collidingIds collisions
     in traverse_ (uncurry damageFromTo) collidingEnts
   where
     -- | Apply damage from the damager to the damagee
-    damageFromTo :: Ent -> Ent -> GameSystem ()
+    damageFromTo :: (Monad m) => Ent -> Ent -> GameSystemT m ()
     damageFromTo damager damagee = do
       -- Entities are Harmless by default
       maybeDamage <- runQueryT damager (query damage)

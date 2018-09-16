@@ -48,6 +48,7 @@ let
       # these tests take _forever_
       kan-extensions = haskellPackagesStable.kan-extensions;
       lens = haskellPackagesStable.lens;
+      MonadRandom = haskellPackagesStable.MonadRandom;
       linear = pkgsUnstable.haskell.lib.dontCheck haskellPackagesStable.linear;
       gloss = pkgsUnstable.haskell.lib.dontCheck haskellPackagesStable.gloss;
       happy = pkgsUnstable.haskell.lib.dontCheck haskellOld.happy;
